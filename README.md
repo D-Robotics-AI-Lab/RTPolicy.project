@@ -2,6 +2,8 @@
 
 RTPolicy 的独立项目主页仓库。代码仓库：[D-Robotics-AI-Lab/RTPolicy](https://github.com/D-Robotics-AI-Lab/RTPolicy)。
 
+项目介绍以模型为主：DINOv3-CNN、多视角交替注意力、空间 Adapter、DiT / Flow Matching 和任务表现。Lance、读取与训练加速收在技术附录。
+
 纯 HTML / CSS / JavaScript，无框架、安装或构建步骤；没有外部字体、跟踪器或第三方脚本。
 
 ## 当前状态
@@ -22,12 +24,19 @@ python3 -m http.server 8000 --bind 127.0.0.1
 
 在同一台机器打开 `http://127.0.0.1:8000`。在远程服务器运行时，请通过 SSH 转发端口访问，不要把该预览服务暴露到公网。
 
+## 页面需要一直开着本地服务吗
+
+- **直接打开本地 index.html：**不需要启动服务，只在自己的浏览器中预览。
+- **用本地 HTTP 服务预览：**服务停止后，该预览地址不能继续加载；已经打开的页面可能仍能暂时显示。
+- **正式部署到 GitHub Pages：**GitHub 托管静态文件，不依赖个人电脑、当前终端或训练服务器持续运行。GitHub Actions 只在构建/发布时运行。
+- **当前状态：**仓库是 Private，Pages 尚未上线。以后可以只公开页面仓库并发布主页，代码仓库继续 Private；真正限制访客访问的私有 Pages 则要求 Enterprise Cloud。
+
 ## 后续怎么改
 
 |文件|修改内容|
 |---|---|
 |`index.html`|标题、介绍、章节、链接、实验条件与说明|
-|`content.js`|实测数字、JPEG/Video 数据路径说明、命令示例|
+|`content.js`|模型说明、实测数字与命令示例|
 |`styles.css`|配色、间距、字体、桌面与手机布局|
 |`main.js`|表格生成、切换、折叠说明及复制交互|
 

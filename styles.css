@@ -1246,3 +1246,131 @@ code {
     animation: none !important;
   }
 }
+
+/* Model-first project presentation. */
+.hero .model-title {
+  font-size: 76px;
+  letter-spacing: -2px;
+  line-height: 1.05;
+  margin: 25px 0 23px;
+}
+.hero .model-title > span {
+  display: block;
+  font-size: 42px;
+  letter-spacing: -1px;
+  line-height: 1.5;
+  margin-top: 20px;
+}
+.io-eyebrow {
+  font: 10px var(--mono);
+  letter-spacing: 1.2px;
+  color: var(--muted);
+}
+.io-row {
+  border-top: 1px solid #d1ddc9;
+  padding: 18px 0;
+  display: grid;
+  grid-template-columns: 42px 1fr;
+  gap: 3px 16px;
+  max-width: 360px;
+}
+.io-row:first-of-type {
+  margin-top: 20px;
+}
+.io-row > span {
+  font-size: 10px;
+  color: #789069;
+  grid-row: 1/3;
+  padding-top: 3px;
+}
+.io-row strong {
+  font-size: 17px;
+  font-weight: 550;
+}
+.io-row small {
+  font-size: 10px;
+  color: var(--muted);
+}
+.io-arrow {
+  font: 25px var(--mono);
+  padding: 0 0 17px 58px;
+  color: #789069;
+}
+.io-output strong {
+  color: #476c32;
+}
+.model-io .small-note {
+  margin-top: 18px;
+}
+.engineering-section {
+  padding-top: 45px;
+}
+.engineering-details {
+  border-block: 1px solid var(--line);
+  padding-block: 25px;
+}
+.engineering-details > summary {
+  list-style: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+.engineering-details > summary::-webkit-details-marker {
+  display: none;
+}
+.engineering-details h2 {
+  font-size: 25px;
+  font-weight: 550;
+  letter-spacing: -0.5px;
+  margin: 8px 0 0;
+}
+.engineering-details > summary > span {
+  font-size: 11px;
+  color: var(--muted);
+  white-space: nowrap;
+}
+.engineering-content {
+  padding-block: 35px 10px;
+}
+.engineering-content .section-heading h2 {
+  font-size: 21px;
+}
+@media (max-width: 1050px) {
+  .hero .model-title {
+    font-size: 65px;
+  }
+  .hero .model-title > span {
+    font-size: 35px;
+  }
+}
+@media (max-width: 760px) {
+  .hero .model-title {
+    font-size: 64px;
+  }
+  .hero .model-title > span {
+    font-size: 35px;
+    margin-top: 15px;
+  }
+  .io-row {
+    max-width: 100%;
+  }
+  .engineering-details h2 {
+    font-size: 22px;
+  }
+  .engineering-details > summary > span {
+    font-size: 9px;
+  }
+  .engineering-section {
+    padding-top: 25px;
+  }
+}
+@media (max-width: 360px) {
+  .hero .model-title {
+    font-size: 56px;
+  }
+  .hero .model-title > span {
+    font-size: 31px;
+  }
+}

@@ -46,19 +46,19 @@
       `${row.before}%`,
       `${row.after}%`,
       `${delta > 0 ? "+" : ""}${delta} pp`,
-      row.it.toFixed(4),
     ])
       tr.append(cell("td", text));
     document.querySelector("#quality-rows").append(tr);
   }
-  document.querySelector("#metric-jpeg").textContent =
-    data.speed[2].it.toFixed(4);
-  const change = (data.speed[1].it / data.speed[0].it - 1) * 100;
-  const speedup = document.querySelector("#metric-speedup");
-  speedup.replaceChildren(
-    document.createTextNode(`+${change.toFixed(2)}`),
-    cell("span", "%"),
-  );
+  const average =
+    data.quality.reduce((total, row) => total + row.after, 0) /
+    data.quality.length;
+  document
+    .querySelector("#metric-quality")
+    .replaceChildren(
+      document.createTextNode(average.toFixed(1)),
+      cell("span", "%"),
+    );
 
   const resultTabs = [...document.querySelectorAll("[data-result]")];
   function selectResult(button, focus = false) {
@@ -86,17 +86,20 @@
       }
     });
   });
-  document.querySelectorAll("[data-format]").forEach((button) =>
+  document.querySelectorAll("[data-model]").forEach((button) =>
     button.addEventListener("click", () => {
-      document.querySelectorAll("[data-format]").forEach((item) => {
+      document.querySelectorAll("[data-model]").forEach((item) => {
         item.classList.toggle("active", item === button);
         item.setAttribute("aria-pressed", String(item === button));
       });
-      const format = data.formats[button.dataset.format];
-      document.querySelector("#format-title").textContent = format.title;
-      document.querySelector("#format-description").textContent =
-        format.description;
-      document.querySelector("#decode-title").textContent = format.decode;
+      data.modelModes[button.dataset.model].forEach((step, index) => {
+        document.querySelector(`#model-step-label-${index}`).textContent =
+          step.label;
+        document.querySelector(`#model-step-title-${index}`).textContent =
+          step.title;
+        document.querySelector(`#model-step-description-${index}`).textContent =
+          step.description;
+      });
     }),
   );
 

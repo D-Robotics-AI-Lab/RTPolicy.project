@@ -30,17 +30,51 @@ window.RTPOLICY_CONTENT = {
     { task: "click_bell", before: 70, after: 71, it: 6.055657235018909 },
     { task: "dump_bin_bigbin", before: 86, after: 91, it: 6.167498037250611 },
   ],
-  formats: {
-    jpeg: {
-      title: "按位置读取 JPEG 字节",
-      description: "blob 描述符 + 按需 mmap",
-      decode: "并行解码，有界预取",
-    },
-    video: {
-      title: "按范围读取原始视频",
-      description: "AV1 / GOP2 · 文件范围读取",
-      decode: "PyAV CPU 解码 + decoder cache",
-    },
+  modelModes: {
+    architecture: [
+      {
+        label: "VISUAL REPRESENTATION",
+        title: "DINOv3-CNN 提取多视角表征",
+        description: "共享预训练视觉骨干，示例配置冻结骨干",
+      },
+      {
+        label: "MULTI-VIEW FUSION",
+        title: "交替注意力 + 空间 Adapter",
+        description: "视角内 / 跨视角交互，输出紧凑视觉 tokens",
+      },
+      {
+        label: "CONDITIONED TRAJECTORY",
+        title: "视觉条件 + 状态 / 动作 tokens",
+        description: "已知状态锚定轨迹前缀，未来动作从噪声开始",
+      },
+      {
+        label: "FLOW MATCHING POLICY",
+        title: "DiT 预测速度场，生成动作片段",
+        description: "沿时间积分，得到可执行的动作序列",
+      },
+    ],
+    inference: [
+      {
+        label: "01 / OBSERVE",
+        title: "读取当前多视角图像与机器人状态",
+        description: "图像经过视觉编码、交替注意力与 Adapter",
+      },
+      {
+        label: "02 / INITIALIZE",
+        title: "固定已知状态，初始化未来动作",
+        description: "未来轨迹从高斯噪声出发",
+      },
+      {
+        label: "03 / INTEGRATE",
+        title: "迭代预测速度并更新动作轨迹",
+        description: "本轮评测 NFE10；步数由策略配置决定",
+      },
+      {
+        label: "04 / ACT",
+        title: "输出动作片段，接收下一次观察",
+        description: "动作维度与执行长度遵循机器人配置",
+      },
+    ],
   },
   commands: {
     install: {

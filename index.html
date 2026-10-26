@@ -5,10 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta
       name="description"
-      content="RTPolicy：机器人策略训练、RobotWin 评测与部署。探索 Lance Video/JPEG 数据管线与实测性能。"
+      content="RTPolicy：基于多视角视觉表征与 Flow Matching 的机器人策略模型。了解模型结构、动作生成与任务表现。"
     />
     <meta name="theme-color" content="#173f36" />
-    <title>RTPolicy · 机器人策略训练与部署</title>
+    <title>RTPolicy · Multi-view Flow-Matching Policy</title>
     <link
       rel="icon"
       href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='12' fill='%23173f36'/%3E%3Ctext x='20' y='27' font-family='sans-serif' font-size='24' font-weight='700' text-anchor='middle' fill='%23dcf4a5'%3ER%3C/text%3E%3C/svg%3E"
@@ -25,8 +25,8 @@
         RTPolicy</a
       >
       <nav aria-label="主导航">
-        <a href="#results">实验结果</a><a href="#approach">优化思路</a
-        ><a href="#data">数据格式</a><a href="#start">开始使用</a>
+        <a href="#approach">模型结构</a><a href="#results">任务表现</a
+        ><a href="#engineering">技术附录</a><a href="#start">开始使用</a>
       </nav>
       <a
         class="header-code"
@@ -41,16 +41,19 @@
       <section class="hero shell" aria-labelledby="hero-title">
         <div class="hero-copy">
           <div class="eyebrow">
-            <span class="eyebrow-dot"></span> ROBOT LEARNING · TRAINING SYSTEMS
+            <span class="eyebrow-dot"></span> MULTI-VIEW VISUOMOTOR POLICY
           </div>
-          <h1 id="hero-title">让策略训练，<br /><span>跑得更顺畅。</span></h1>
+          <h1 id="hero-title" class="model-title">
+            RTPolicy<span>从多视角观察，<br />到连续动作。</span>
+          </h1>
           <p class="hero-description">
-            RTPolicy 将机器人策略训练、仿真评测与模型部署连接起来。用 Lance
-            按需读取 Video 或 JPEG，让数据准备与 GPU 计算更好地配合。
+            基于 Flow Matching
+            的机器人视觉运动策略。用预训练视觉骨干、跨视角交替注意力和空间
+            Adapter 编码观察，以机器人状态为条件，通过 DiT 生成动作序列。
           </p>
           <div class="hero-actions">
-            <a class="button primary" href="#results"
-              >查看实验结果 <span aria-hidden="true">↓</span></a
+            <a class="button primary" href="#approach"
+              >了解模型结构 <span aria-hidden="true">↓</span></a
             ><a
               class="button secondary"
               href="https://github.com/D-Robotics-AI-Lab/RTPolicy"
@@ -60,102 +63,197 @@
             >
           </div>
           <div class="hero-tags">
-            <span>Lance Video / JPEG</span><span>PyTorch</span
-            ><span>RobotWin 2.0</span>
+            <span>DINOv3-CNN</span><span>AA + Adapter</span
+            ><span>Flow Matching</span>
           </div>
         </div>
-
         <div class="pipeline-panel">
           <div class="panel-top">
-            <span><span class="status-dot"></span> 一批数据的旅程</span
-            ><span class="mono">01 → 04</span>
+            <span><span class="status-dot"></span> 从视觉条件到动作序列</span
+            ><span class="mono">RTPolicy</span>
           </div>
-          <div
-            class="pipeline-tabs"
-            role="group"
-            aria-label="查看不同媒体的数据路径"
-          >
+          <div class="pipeline-tabs" role="group" aria-label="模型说明">
             <button
               type="button"
               class="active"
-              data-format="jpeg"
+              data-model="architecture"
               aria-pressed="true"
             >
-              JPEG blob</button
-            ><button type="button" data-format="video" aria-pressed="false">
-              Video
+              模型结构</button
+            ><button type="button" data-model="inference" aria-pressed="false">
+              一次推理
             </button>
           </div>
           <div class="pipeline-steps">
             <div class="pipeline-step">
               <span class="step-index">01</span>
               <div>
-                <span class="step-label">EFS → LANCE</span>
-                <h3 id="format-title">按位置读取 JPEG 字节</h3>
-                <p id="format-description">blob 描述符 + 按需 mmap</p>
+                <span class="step-label" id="model-step-label-0"
+                  >VISUAL REPRESENTATION</span
+                >
+                <h3 id="model-step-title-0">DINOv3-CNN 提取多视角表征</h3>
+                <p id="model-step-description-0">
+                  共享预训练视觉骨干，示例配置冻结骨干
+                </p>
               </div>
               <span class="step-symbol" aria-hidden="true">↗</span>
             </div>
             <div class="pipeline-step">
               <span class="step-index">02</span>
               <div>
-                <span class="step-label">CPU · DECODE</span>
-                <h3 id="decode-title">并行解码，有界预取</h3>
-                <p>每卡 8 workers · prefetch factor 2</p>
+                <span class="step-label" id="model-step-label-1"
+                  >MULTI-VIEW FUSION</span
+                >
+                <h3 id="model-step-title-1">交替注意力 + 空间 Adapter</h3>
+                <p id="model-step-description-1">
+                  视角内 / 跨视角交互，输出紧凑视觉 tokens
+                </p>
               </div>
               <span class="step-symbol" aria-hidden="true">≋</span>
             </div>
             <div class="pipeline-step">
               <span class="step-index">03</span>
               <div>
-                <span class="step-label">TRANSFER · OVERLAP</span>
-                <h3>传下一批，算当前批</h3>
-                <p>单批 CUDA stream 预取</p>
+                <span class="step-label" id="model-step-label-2"
+                  >CONDITIONED TRAJECTORY</span
+                >
+                <h3 id="model-step-title-2">视觉条件 + 状态 / 动作 tokens</h3>
+                <p id="model-step-description-2">
+                  已知状态锚定轨迹前缀，未来动作从噪声开始
+                </p>
               </div>
               <span class="step-symbol" aria-hidden="true">⇄</span>
             </div>
             <div class="pipeline-step final-step">
               <span class="step-index">04</span>
               <div>
-                <span class="step-label">GPU · TRAIN</span>
-                <h3>编译 backbone，更新策略</h3>
-                <p>每一步仍重新计算图像特征</p>
+                <span class="step-label" id="model-step-label-3"
+                  >FLOW MATCHING POLICY</span
+                >
+                <h3 id="model-step-title-3">DiT 预测速度场，生成动作片段</h3>
+                <p id="model-step-description-3">
+                  沿时间积分，得到可执行的动作序列
+                </p>
               </div>
               <span class="step-symbol" aria-hidden="true">⌁</span>
             </div>
           </div>
           <div class="pipeline-footer">
-            <span>按需取数</span><span>不整库预载</span><span>不预存特征</span>
+            <span>多视角观察</span><span>状态条件</span><span>序列动作</span>
           </div>
         </div>
       </section>
 
-      <section class="metrics shell" aria-label="实验概览">
+      <section class="metrics shell" aria-label="模型与实验概览">
         <div class="metric">
-          <span class="metric-label">五任务 · JPEG</span>
+          <span class="metric-label">五任务复测 · 平均成功率</span>
           <div>
-            <strong>79.6<span>%</span></strong
-            ><span class="metric-trend">均值持平</span>
+            <strong id="metric-quality">79.6<span>%</span></strong>
           </div>
-          <p>320×240，历史 Lance 与编译版对照</p>
+          <p>demo100；五任务，单训练 seed</p>
         </div>
         <div class="metric">
-          <span class="metric-label">640×480 · JPEG 编译版</span>
-          <div>
-            <strong id="metric-jpeg">3.1061</strong
-            ><span class="metric-unit">it/s</span>
-          </div>
-          <p>8×A100，媒体直接从 EFS 读取</p>
+          <span class="metric-label">示例配置 · 视觉条件</span>
+          <div><strong>12</strong><span class="metric-unit">tokens</span></div>
+          <p>三相机，每视角 2×2；每个观测时刻</p>
         </div>
         <div class="metric">
-          <span class="metric-label">640×480 · Video 编译提速</span>
-          <div>
-            <strong id="metric-speedup">+19.01<span>%</span></strong>
-          </div>
-          <p>相同配置，编译前后的端到端对比</p>
+          <span class="metric-label">本轮评测 · 动作生成</span>
+          <div><strong>10</strong><span class="metric-unit">steps</span></div>
+          <p>Flow Matching 积分步数，可按配置调整</p>
         </div>
       </section>
 
+      <section
+        class="approach-section"
+        id="approach"
+        aria-labelledby="approach-title"
+      >
+        <div class="shell section">
+          <div class="section-heading">
+            <div>
+              <div class="eyebrow">01 / MODEL</div>
+              <h2 id="approach-title">从视觉表征，<br />到条件动作生成。</h2>
+            </div>
+            <p>
+              图像描述场景，状态提供当前条件。<br />策略学习从观察到动作序列的映射。
+            </p>
+          </div>
+          <div class="approach-grid">
+            <div class="approach-note model-io">
+              <span class="io-eyebrow">MODEL INPUT / OUTPUT</span>
+              <div class="io-row">
+                <span>观察</span><strong>多相机 RGB 图像</strong
+                ><small>视角内表征与跨视角融合</small>
+              </div>
+              <div class="io-row">
+                <span>条件</span><strong>机器人状态</strong
+                ><small>保持已知状态前缀，预测未来动作</small>
+              </div>
+              <div class="io-arrow" aria-hidden="true">↓</div>
+              <div class="io-row io-output">
+                <span>输出</span><strong>连续动作片段</strong
+                ><small>随新观测更新策略预测</small>
+              </div>
+              <p class="small-note">
+                架构依据正式发布代码。3 相机、2×2 tokens 和 NFE10
+                对应当前示例配置；其他机器人需按相机与动作配置调整。
+              </p>
+            </div>
+            <div class="explanations">
+              <details open>
+                <summary>
+                  <span class="detail-index">01</span>预训练视觉骨干 +
+                  跨视角交互<span class="detail-plus" aria-hidden="true"
+                    >+</span
+                  >
+                </summary>
+                <p>
+                  DINOv3-CNN 分别提取各相机的图像 tokens；MultiViewFuser
+                  在视角内注意力与全局跨视角注意力之间交替，先让多个视角交换信息，再进入空间压缩。这里
+                  AA 指 Alternating Attention。
+                </p>
+              </details>
+              <details>
+                <summary>
+                  <span class="detail-index">02</span>空间 Adapter
+                  形成紧凑视觉条件<span class="detail-plus" aria-hidden="true"
+                    >+</span
+                  >
+                </summary>
+                <p>
+                  ResNetAdapter
+                  将每个视角的特征映射为固定空间网格，随后投影到策略隐藏维度。三相机、每视角2×2的示例，每个观测时刻产生12个视觉条件
+                  tokens。
+                </p>
+              </details>
+              <details>
+                <summary>
+                  <span class="detail-index">03</span>状态约束下的 Flow Matching
+                  动作生成<span class="detail-plus" aria-hidden="true">+</span>
+                </summary>
+                <p>
+                  已知状态放在轨迹前缀，未来动作从高斯噪声初始化。DiT
+                  结合视觉条件、时间与轨迹 tokens
+                  预测速度场，逐步积分生成动作；每步保持已知状态位置。本轮任务评测用10步。
+                </p>
+              </details>
+              <details>
+                <summary>
+                  <span class="detail-index">04</span>从策略 checkpoint
+                  到评测与部署<span class="detail-plus" aria-hidden="true"
+                    >+</span
+                  >
+                </summary>
+                <p>
+                  同一策略实现配套 RobotWin 仿真评测、ONNX 导出与 TensorRT
+                  构建工具。部署前仍需对齐相机、状态/动作维度和预处理；实际延迟需结合具体硬件、图像分辨率与推理步数测量。
+                </p>
+              </details>
+            </div>
+          </div>
+        </div>
+      </section>
       <section
         class="section shell"
         id="results"
@@ -163,37 +261,88 @@
       >
         <div class="section-heading">
           <div>
-            <div class="eyebrow">01 / EXPERIMENTS</div>
-            <h2 id="results-title">先看结果，再看边界。</h2>
+            <div class="eyebrow">02 / EVALUATION</div>
+            <h2 id="results-title">在具体操作任务中检验策略。</h2>
           </div>
-          <p>
-            训练速度与任务成功率分别记录。<br />每个数字，都对应明确的实验条件。
-          </p>
+          <p>先看策略完成任务的表现。<br />训练系统性能单独列在技术附录。</p>
         </div>
         <div class="result-tabs" role="tablist" aria-label="实验类别">
           <button
             type="button"
-            id="speed-tab"
-            role="tab"
-            aria-selected="true"
-            aria-controls="speed-panel"
-            data-result="speed"
-          >
-            640×480 · 训练效率</button
-          ><button
-            type="button"
             id="quality-tab"
             role="tab"
-            aria-selected="false"
+            aria-selected="true"
             aria-controls="quality-panel"
-            tabindex="-1"
             data-result="quality"
           >
-            320×240 · 五任务成绩
+            五任务 · 策略表现</button
+          ><button
+            type="button"
+            id="speed-tab"
+            role="tab"
+            aria-selected="false"
+            aria-controls="speed-panel"
+            tabindex="-1"
+            data-result="speed"
+          >
+            技术附录 · 训练效率
           </button>
         </div>
 
-        <div id="speed-panel" role="tabpanel" aria-labelledby="speed-tab">
+        <div id="quality-panel" role="tabpanel" aria-labelledby="quality-tab">
+          <div class="result-meta">
+            <span>2026.10.15</span><span>EFS Lance JPEG</span
+            ><span>每任务 100 episodes</span><span>NFE 10</span>
+          </div>
+          <div
+            class="table-scroll"
+            tabindex="0"
+            role="region"
+            aria-label="五任务成功率对照"
+          >
+            <table class="results-table">
+              <caption class="sr-only">
+                五任务策略成功率：历史发布配置与冻结骨干编译后的复测。
+              </caption>
+              <thead>
+                <tr>
+                  <th scope="col">任务</th>
+                  <th scope="col">历史发布配置</th>
+                  <th scope="col">冻结骨干编译复测</th>
+                  <th scope="col">变化</th>
+                </tr>
+              </thead>
+              <tbody id="quality-rows"></tbody>
+              <tfoot>
+                <tr>
+                  <th scope="row">汇总</th>
+                  <td>79.6%</td>
+                  <td>79.6%</td>
+                  <td>0.0 pp</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+          <div class="result-insight">
+            <span class="insight-icon" aria-hidden="true">≈</span>
+            <p>
+              <strong>总体均值持平，单任务有升有降。</strong><br />alarm −5
+              个百分点、dump +5 个百分点。这是单训练 seed
+              的历史对照，不能证明严格质量等效。
+            </p>
+          </div>
+          <p class="footnote">
+            CNN Base / 三相机 / AA+Adapter，demo100、300 epochs、global
+            batch256、BF16、train seed0。评测单 L4 / 2 processes、seed42、JPEG
+            roundtrip ON、eager 非 EMA 终模。历史评测记录为 2 卡 / 2 processes。
+          </p>
+        </div>
+        <div
+          id="speed-panel"
+          hidden
+          role="tabpanel"
+          aria-labelledby="speed-tab"
+        >
           <div class="result-meta">
             <span>2026.10.21</span><span>8×A100-SXM4-80GB</span
             ><span>Global batch 256</span><span>三相机 · BF16</span>
@@ -238,63 +387,6 @@
           </p>
         </div>
 
-        <div
-          id="quality-panel"
-          role="tabpanel"
-          aria-labelledby="quality-tab"
-          hidden
-        >
-          <div class="result-meta">
-            <span>2026.10.15</span><span>EFS Lance JPEG</span
-            ><span>每任务 100 episodes</span><span>NFE 10</span>
-          </div>
-          <div
-            class="table-scroll"
-            tabindex="0"
-            role="region"
-            aria-label="五任务成功率对照"
-          >
-            <table class="results-table">
-              <caption class="sr-only">
-                五任务历史 Lance 与编译后成功率、训练速度。
-              </caption>
-              <thead>
-                <tr>
-                  <th scope="col">任务</th>
-                  <th scope="col">历史 Lance</th>
-                  <th scope="col">编译后</th>
-                  <th scope="col">变化</th>
-                  <th scope="col">新版训练 it/s</th>
-                </tr>
-              </thead>
-              <tbody id="quality-rows"></tbody>
-              <tfoot>
-                <tr>
-                  <th scope="row">汇总</th>
-                  <td>79.6%</td>
-                  <td>79.6%</td>
-                  <td>0.0 pp</td>
-                  <td>6.1094</td>
-                </tr>
-              </tfoot>
-            </table>
-          </div>
-          <div class="result-insight">
-            <span class="insight-icon" aria-hidden="true">≈</span>
-            <p>
-              <strong>总体均值持平，单任务有升有降。</strong><br />alarm −5
-              个百分点、dump +5 个百分点。这是单训练 seed
-              的历史对照，不能证明严格质量等效。
-            </p>
-          </div>
-          <p class="footnote">
-            CNN Base / 三相机 / AA+Adapter，demo100、300 epochs、global
-            batch256、BF16、train seed0。评测单 L4 / 2 processes、seed42、JPEG
-            roundtrip ON、eager 非 EMA 终模。历史评测记录为 2 卡 / 2
-            processes。训练速度剔除各任务前 100 步，汇总按总计时步数 /
-            总耗时计算，包含验证与保存。
-          </p>
-        </div>
         <div class="section-link">
           <a
             href="https://horizonrobotics.feishu.cn/wiki/MqF0wlQ9PixLJHkBVwYcTZW6nnf"
@@ -311,169 +403,92 @@
       </section>
 
       <section
-        class="approach-section"
-        id="approach"
-        aria-labelledby="approach-title"
+        class="section shell engineering-section"
+        id="engineering"
+        aria-labelledby="engineering-title"
       >
-        <div class="shell section">
-          <div class="section-heading">
+        <details class="engineering-details">
+          <summary>
             <div>
-              <div class="eyebrow">02 / APPROACH</div>
-              <h2 id="approach-title">把等待找出来，<br />一次优化一件事。</h2>
+              <div class="eyebrow">03 / ENGINEERING NOTES</div>
+              <h2 id="engineering-title">数据与训练工程</h2>
             </div>
-            <p>
-              不是一味加大 worker 或预取。<br />先定位关键路径，再验证端到端收益。
-            </p>
-          </div>
-          <div class="approach-grid">
-            <div class="approach-note">
-              <div class="ratio-number">4.15<span>%</span></div>
-              <h3>去掉加载后，还能快多少？</h3>
-              <p>
-                正常 EFS JPEG 训练为 3.1129 it/s，固定 GPU 输入为 3.2421
-                it/s。这个配方下，剩余差距已经较小。
-              </p>
-              <div class="mini-comparison">
-                <div>
-                  <span>正常加载</span><i style="--bar-width: 96.02%"></i
-                  ><b>3.1129</b>
-                </div>
-                <div>
-                  <span>固定输入</span><i style="--bar-width: 100%"></i
-                  ><b>3.2421</b>
-                </div>
+            <span>展开技术说明 +</span>
+          </summary>
+          <section
+            class="engineering-content"
+            id="data"
+            aria-labelledby="data-title"
+          >
+            <div class="section-heading">
+              <div>
+                <div class="eyebrow">DATA & TRAINING SUPPORT</div>
+                <h2 id="data-title">数据格式与训练支持</h2>
               </div>
-              <p class="small-note">
-                2026.10.16，8卡 /
-                global256；固定输入只作诊断，仍执行完整模型计算。它不是正式数据读取方法，也不是硬件
-                Roofline 的证明。
+              <p>LeRobot → Lance。<br />明确什么被保留，什么需要重新编码。</p>
+            </div>
+            <div
+              class="table-scroll format-table"
+              tabindex="0"
+              role="region"
+              aria-label="LeRobot 转 Lance 格式支持"
+            >
+              <table>
+                <thead>
+                  <tr>
+                    <th scope="col">LeRobot 源格式</th>
+                    <th scope="col">Lance 目标格式</th>
+                    <th scope="col">支持情况</th>
+                    <th scope="col">实际处理</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <th scope="row">Video / MP4</th>
+                    <td>Video</td>
+                    <td><span class="supported">支持</span></td>
+                    <td>保留原始 MP4 字节，不重新编码</td>
+                  </tr>
+                  <tr>
+                    <th scope="row">Video / MP4</th>
+                    <td>JPEG blob</td>
+                    <td><span class="supported">支持</span></td>
+                    <td>解码对应帧，再编码为 JPEG</td>
+                  </tr>
+                  <tr>
+                    <th scope="row">JPEG / image</th>
+                    <td>JPEG blob</td>
+                    <td><span class="supported">支持</span></td>
+                    <td>读取图像后重新编码为 JPEG</td>
+                  </tr>
+                  <tr>
+                    <th scope="row">JPEG / image</th>
+                    <td>Video</td>
+                    <td><span class="not-yet">尚未实现</span></td>
+                    <td>需要额外的视频编码流程</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="data-notes">
+              <p>
+                <strong>当前接收 LeRobot v3.0。</strong>v2
+                数据需先升级；源数据要有完整元数据。JPEG blob 需显式指定
+                <code>--jpeg-storage blob</code>。
+              </p>
+              <p>
+                <strong>重新编码不等于原字节直通。</strong>即使
+                quality=100，也不保证 JPEG 像素完全不变。已有 Lance JPEG 的 blob
+                重排工具则保留 JPEG 字节。
               </p>
             </div>
-            <div class="explanations">
-              <details open>
-                <summary>
-                  <span class="detail-index">01</span
-                  >按需读，而不是先读完整个数据集<span
-                    class="detail-plus"
-                    aria-hidden="true"
-                    >+</span
-                  >
-                </summary>
-                <p>
-                  JPEG blob 用文件位置和长度直接定位图片，mmap
-                  只在访问时触发读取。它改变了读取路径，不等于预加载；OS
-                  文件缓存仍由系统管理。
-                </p>
-              </details>
-              <details>
-                <summary>
-                  <span class="detail-index">02</span>让数据搬运与 GPU
-                  计算重叠<span class="detail-plus" aria-hidden="true">+</span>
-                </summary>
-                <p>
-                  独立 CUDA stream 提前搬下一批，当前批次继续计算。比如计算
-                  300ms、搬运 20ms，串行约 320ms，理想重叠后接近
-                  300ms；这是原理示意，实际收益由完整训练测量。
-                </p>
-              </details>
-              <details>
-                <summary>
-                  <span class="detail-index">03</span
-                  >编译程序，每张图依然重新算<span
-                    class="detail-plus"
-                    aria-hidden="true"
-                    >+</span
-                  >
-                </summary>
-                <p>
-                  Inductor 优化冻结 backbone
-                  的执行，减少可融合算子的启动和中间写回。缓存的是执行代码，不是所有图像的特征；保存的参数仍可用于
-                  eager 评测。
-                </p>
-              </details>
-              <details>
-                <summary>
-                  <span class="detail-index">04</span
-                  >看完整计时窗口，也看任务效果<span
-                    class="detail-plus"
-                    aria-hidden="true"
-                    >+</span
-                  >
-                </summary>
-                <p>
-                  平均 it/s、步骤长尾、SM
-                  波动和成功率一起看。固定输入用于排除加载影响，Profiler
-                  独立短跑；启动失败和协议不一致的评测不计入正式结果。
-                </p>
-              </details>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section class="section shell" id="data" aria-labelledby="data-title">
-        <div class="section-heading">
-          <div>
-            <div class="eyebrow">03 / DATA FORMATS</div>
-            <h2 id="data-title">同一份数据，两种读取方式。</h2>
-          </div>
-          <p>LeRobot → Lance。<br />明确什么被保留，什么需要重新编码。</p>
-        </div>
-        <div
-          class="table-scroll format-table"
-          tabindex="0"
-          role="region"
-          aria-label="LeRobot 转 Lance 格式支持"
-        >
-          <table>
-            <thead>
-              <tr>
-                <th scope="col">LeRobot 源格式</th>
-                <th scope="col">Lance 目标格式</th>
-                <th scope="col">支持情况</th>
-                <th scope="col">实际处理</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <th scope="row">Video / MP4</th>
-                <td>Video</td>
-                <td><span class="supported">支持</span></td>
-                <td>保留原始 MP4 字节，不重新编码</td>
-              </tr>
-              <tr>
-                <th scope="row">Video / MP4</th>
-                <td>JPEG blob</td>
-                <td><span class="supported">支持</span></td>
-                <td>解码对应帧，再编码为 JPEG</td>
-              </tr>
-              <tr>
-                <th scope="row">JPEG / image</th>
-                <td>JPEG blob</td>
-                <td><span class="supported">支持</span></td>
-                <td>读取图像后重新编码为 JPEG</td>
-              </tr>
-              <tr>
-                <th scope="row">JPEG / image</th>
-                <td>Video</td>
-                <td><span class="not-yet">尚未实现</span></td>
-                <td>需要额外的视频编码流程</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-        <div class="data-notes">
-          <p>
-            <strong>当前接收 LeRobot v3.0。</strong>v2
-            数据需先升级；源数据要有完整元数据。JPEG blob 需显式指定
-            <code>--jpeg-storage blob</code>。
+          </section>
+          <p class="footnote">
+            Lance 负责数据存储与读取；CPU/GPU 预取、mmap 和 backbone
+            编译服务于训练效率。这些是工程实现，模型主体是上面的视觉编码、跨视角融合与
+            Flow Matching 动作策略。
           </p>
-          <p>
-            <strong>重新编码不等于原字节直通。</strong>即使
-            quality=100，也不保证 JPEG 像素完全不变。已有 Lance JPEG 的 blob
-            重排工具则保留 JPEG 字节。
-          </p>
-        </div>
+        </details>
       </section>
 
       <section
@@ -485,7 +500,7 @@
           <div class="eyebrow">04 / GET STARTED</div>
           <h2 id="start-title">从一份可复现的配置开始。</h2>
           <p>
-            正式代码、数据转换和训练配置都在代码仓库。先对齐数据、相机与状态维度，再开始训练。
+            模型实现、训练配置、仿真评测与导出工具都在代码仓库。先对齐相机、状态与动作维度，再运行策略。
           </p>
           <a
             class="text-link"
@@ -527,7 +542,7 @@
         <a class="brand" href="#"
           >RTPolicy<span class="footer-slash"> / </span></a
         >
-        <p>机器人策略训练 · 数据管线 · 评测与部署</p>
+        <p>多视角视觉表征 · Flow Matching · 动作策略</p>
       </div>
       <div class="footer-links">
         <a
