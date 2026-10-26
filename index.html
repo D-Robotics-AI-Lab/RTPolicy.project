@@ -1,0 +1,547 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="RTPolicy：机器人策略训练、RobotWin 评测与部署。探索 Lance Video/JPEG 数据管线与实测性能。"
+    />
+    <meta name="theme-color" content="#173f36" />
+    <title>RTPolicy · 机器人策略训练与部署</title>
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='12' fill='%23173f36'/%3E%3Ctext x='20' y='27' font-family='sans-serif' font-size='24' font-weight='700' text-anchor='middle' fill='%23dcf4a5'%3ER%3C/text%3E%3C/svg%3E"
+    />
+    <link rel="stylesheet" href="styles.css" />
+    <script src="content.js" defer></script>
+    <script src="main.js" defer></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">跳到正文</a>
+    <header class="header">
+      <a class="brand" href="#"
+        ><span class="brand-mark" aria-hidden="true">R<span>↗</span></span>
+        RTPolicy</a
+      >
+      <nav aria-label="主导航">
+        <a href="#results">实验结果</a><a href="#approach">优化思路</a
+        ><a href="#data">数据格式</a><a href="#start">开始使用</a>
+      </nav>
+      <a
+        class="header-code"
+        href="https://github.com/D-Robotics-AI-Lab/RTPolicy"
+        target="_blank"
+        rel="noopener noreferrer"
+        >代码仓库 <span aria-hidden="true">↗</span></a
+      >
+    </header>
+
+    <main id="main">
+      <section class="hero shell" aria-labelledby="hero-title">
+        <div class="hero-copy">
+          <div class="eyebrow">
+            <span class="eyebrow-dot"></span> ROBOT LEARNING · TRAINING SYSTEMS
+          </div>
+          <h1 id="hero-title">让策略训练，<br /><span>跑得更顺畅。</span></h1>
+          <p class="hero-description">
+            RTPolicy 将机器人策略训练、仿真评测与模型部署连接起来。用 Lance
+            按需读取 Video 或 JPEG，让数据准备与 GPU 计算更好地配合。
+          </p>
+          <div class="hero-actions">
+            <a class="button primary" href="#results"
+              >查看实验结果 <span aria-hidden="true">↓</span></a
+            ><a
+              class="button secondary"
+              href="https://github.com/D-Robotics-AI-Lab/RTPolicy"
+              target="_blank"
+              rel="noopener noreferrer"
+              >获取代码 <span aria-hidden="true">↗</span></a
+            >
+          </div>
+          <div class="hero-tags">
+            <span>Lance Video / JPEG</span><span>PyTorch</span
+            ><span>RobotWin 2.0</span>
+          </div>
+        </div>
+
+        <div class="pipeline-panel">
+          <div class="panel-top">
+            <span><span class="status-dot"></span> 一批数据的旅程</span
+            ><span class="mono">01 → 04</span>
+          </div>
+          <div
+            class="pipeline-tabs"
+            role="group"
+            aria-label="查看不同媒体的数据路径"
+          >
+            <button
+              type="button"
+              class="active"
+              data-format="jpeg"
+              aria-pressed="true"
+            >
+              JPEG blob</button
+            ><button type="button" data-format="video" aria-pressed="false">
+              Video
+            </button>
+          </div>
+          <div class="pipeline-steps">
+            <div class="pipeline-step">
+              <span class="step-index">01</span>
+              <div>
+                <span class="step-label">EFS → LANCE</span>
+                <h3 id="format-title">按位置读取 JPEG 字节</h3>
+                <p id="format-description">blob 描述符 + 按需 mmap</p>
+              </div>
+              <span class="step-symbol" aria-hidden="true">↗</span>
+            </div>
+            <div class="pipeline-step">
+              <span class="step-index">02</span>
+              <div>
+                <span class="step-label">CPU · DECODE</span>
+                <h3 id="decode-title">并行解码，有界预取</h3>
+                <p>每卡 8 workers · prefetch factor 2</p>
+              </div>
+              <span class="step-symbol" aria-hidden="true">≋</span>
+            </div>
+            <div class="pipeline-step">
+              <span class="step-index">03</span>
+              <div>
+                <span class="step-label">TRANSFER · OVERLAP</span>
+                <h3>传下一批，算当前批</h3>
+                <p>单批 CUDA stream 预取</p>
+              </div>
+              <span class="step-symbol" aria-hidden="true">⇄</span>
+            </div>
+            <div class="pipeline-step final-step">
+              <span class="step-index">04</span>
+              <div>
+                <span class="step-label">GPU · TRAIN</span>
+                <h3>编译 backbone，更新策略</h3>
+                <p>每一步仍重新计算图像特征</p>
+              </div>
+              <span class="step-symbol" aria-hidden="true">⌁</span>
+            </div>
+          </div>
+          <div class="pipeline-footer">
+            <span>按需取数</span><span>不整库预载</span><span>不预存特征</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="metrics shell" aria-label="实验概览">
+        <div class="metric">
+          <span class="metric-label">五任务 · JPEG</span>
+          <div>
+            <strong>79.6<span>%</span></strong
+            ><span class="metric-trend">均值持平</span>
+          </div>
+          <p>320×240，历史 Lance 与编译版对照</p>
+        </div>
+        <div class="metric">
+          <span class="metric-label">640×480 · JPEG 编译版</span>
+          <div>
+            <strong id="metric-jpeg">3.1061</strong
+            ><span class="metric-unit">it/s</span>
+          </div>
+          <p>8×A100，媒体直接从 EFS 读取</p>
+        </div>
+        <div class="metric">
+          <span class="metric-label">640×480 · Video 编译提速</span>
+          <div>
+            <strong id="metric-speedup">+19.01<span>%</span></strong>
+          </div>
+          <p>相同配置，编译前后的端到端对比</p>
+        </div>
+      </section>
+
+      <section
+        class="section shell"
+        id="results"
+        aria-labelledby="results-title"
+      >
+        <div class="section-heading">
+          <div>
+            <div class="eyebrow">01 / EXPERIMENTS</div>
+            <h2 id="results-title">先看结果，再看边界。</h2>
+          </div>
+          <p>
+            训练速度与任务成功率分别记录。<br />每个数字，都对应明确的实验条件。
+          </p>
+        </div>
+        <div class="result-tabs" role="tablist" aria-label="实验类别">
+          <button
+            type="button"
+            id="speed-tab"
+            role="tab"
+            aria-selected="true"
+            aria-controls="speed-panel"
+            data-result="speed"
+          >
+            640×480 · 训练效率</button
+          ><button
+            type="button"
+            id="quality-tab"
+            role="tab"
+            aria-selected="false"
+            aria-controls="quality-panel"
+            tabindex="-1"
+            data-result="quality"
+          >
+            320×240 · 五任务成绩
+          </button>
+        </div>
+
+        <div id="speed-panel" role="tabpanel" aria-labelledby="speed-tab">
+          <div class="result-meta">
+            <span>2026.10.21</span><span>8×A100-SXM4-80GB</span
+            ><span>Global batch 256</span><span>三相机 · BF16</span>
+          </div>
+          <div
+            class="table-scroll"
+            tabindex="0"
+            role="region"
+            aria-label="Video 和 JPEG 训练效率对照"
+          >
+            <table class="results-table">
+              <caption class="sr-only">
+                640×480 同机效率；训练 it/s 越高越快，P99 越小通常越平稳。
+              </caption>
+              <thead>
+                <tr>
+                  <th scope="col">配置</th>
+                  <th scope="col">训练 it/s ↑</th>
+                  <th scope="col">SM 均值</th>
+                  <th scope="col">SM 标准差</th>
+                  <th scope="col">步骤 P99</th>
+                </tr>
+              </thead>
+              <tbody id="speed-rows"></tbody>
+            </table>
+          </div>
+          <div class="result-insight">
+            <span class="insight-icon" aria-hidden="true">↗</span>
+            <p>
+              <strong
+                >编译提高了 Video 的平均速度；JPEG 在本轮更快、更平稳。</strong
+              ><br />Video 编译组有 1.751 秒的取批次长尾。SM busy
+              不能直接代替有效算力或训练效率。
+            </p>
+          </div>
+          <p class="footnote">
+            同 checkpoint20000，100 步预热 + 1000
+            步计时，关闭验证与保存；启动和首次编译不计入稳态速度。未清 OS
+            缓存或锁 GPU 时钟。<strong
+              >Video 与 640×480 尚未测任务成功率。</strong
+            >SM 标准差包含卡间差异，步骤 P99 汇总 8 rank 时序。
+          </p>
+        </div>
+
+        <div
+          id="quality-panel"
+          role="tabpanel"
+          aria-labelledby="quality-tab"
+          hidden
+        >
+          <div class="result-meta">
+            <span>2026.10.15</span><span>EFS Lance JPEG</span
+            ><span>每任务 100 episodes</span><span>NFE 10</span>
+          </div>
+          <div
+            class="table-scroll"
+            tabindex="0"
+            role="region"
+            aria-label="五任务成功率对照"
+          >
+            <table class="results-table">
+              <caption class="sr-only">
+                五任务历史 Lance 与编译后成功率、训练速度。
+              </caption>
+              <thead>
+                <tr>
+                  <th scope="col">任务</th>
+                  <th scope="col">历史 Lance</th>
+                  <th scope="col">编译后</th>
+                  <th scope="col">变化</th>
+                  <th scope="col">新版训练 it/s</th>
+                </tr>
+              </thead>
+              <tbody id="quality-rows"></tbody>
+              <tfoot>
+                <tr>
+                  <th scope="row">汇总</th>
+                  <td>79.6%</td>
+                  <td>79.6%</td>
+                  <td>0.0 pp</td>
+                  <td>6.1094</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+          <div class="result-insight">
+            <span class="insight-icon" aria-hidden="true">≈</span>
+            <p>
+              <strong>总体均值持平，单任务有升有降。</strong><br />alarm −5
+              个百分点、dump +5 个百分点。这是单训练 seed
+              的历史对照，不能证明严格质量等效。
+            </p>
+          </div>
+          <p class="footnote">
+            CNN Base / 三相机 / AA+Adapter，demo100、300 epochs、global
+            batch256、BF16、train seed0。评测单 L4 / 2 processes、seed42、JPEG
+            roundtrip ON、eager 非 EMA 终模。历史评测记录为 2 卡 / 2
+            processes。训练速度剔除各任务前 100 步，汇总按总计时步数 /
+            总耗时计算，包含验证与保存。
+          </p>
+        </div>
+        <div class="section-link">
+          <a
+            href="https://horizonrobotics.feishu.cn/wiki/MqF0wlQ9PixLJHkBVwYcTZW6nnf"
+            target="_blank"
+            rel="noopener noreferrer"
+            >完整实验记录与讲解 <span aria-hidden="true">↗</span></a
+          ><span>访问文档需要相应权限</span>
+        </div>
+        <noscript
+          ><p>
+            请启用 JavaScript 查看实验表格，或打开上面的完整实验记录。
+          </p></noscript
+        >
+      </section>
+
+      <section
+        class="approach-section"
+        id="approach"
+        aria-labelledby="approach-title"
+      >
+        <div class="shell section">
+          <div class="section-heading">
+            <div>
+              <div class="eyebrow">02 / APPROACH</div>
+              <h2 id="approach-title">把等待找出来，<br />一次优化一件事。</h2>
+            </div>
+            <p>
+              不是一味加大 worker 或预取。<br />先定位关键路径，再验证端到端收益。
+            </p>
+          </div>
+          <div class="approach-grid">
+            <div class="approach-note">
+              <div class="ratio-number">4.15<span>%</span></div>
+              <h3>去掉加载后，还能快多少？</h3>
+              <p>
+                正常 EFS JPEG 训练为 3.1129 it/s，固定 GPU 输入为 3.2421
+                it/s。这个配方下，剩余差距已经较小。
+              </p>
+              <div class="mini-comparison">
+                <div>
+                  <span>正常加载</span><i style="--bar-width: 96.02%"></i
+                  ><b>3.1129</b>
+                </div>
+                <div>
+                  <span>固定输入</span><i style="--bar-width: 100%"></i
+                  ><b>3.2421</b>
+                </div>
+              </div>
+              <p class="small-note">
+                2026.10.16，8卡 /
+                global256；固定输入只作诊断，仍执行完整模型计算。它不是正式数据读取方法，也不是硬件
+                Roofline 的证明。
+              </p>
+            </div>
+            <div class="explanations">
+              <details open>
+                <summary>
+                  <span class="detail-index">01</span
+                  >按需读，而不是先读完整个数据集<span
+                    class="detail-plus"
+                    aria-hidden="true"
+                    >+</span
+                  >
+                </summary>
+                <p>
+                  JPEG blob 用文件位置和长度直接定位图片，mmap
+                  只在访问时触发读取。它改变了读取路径，不等于预加载；OS
+                  文件缓存仍由系统管理。
+                </p>
+              </details>
+              <details>
+                <summary>
+                  <span class="detail-index">02</span>让数据搬运与 GPU
+                  计算重叠<span class="detail-plus" aria-hidden="true">+</span>
+                </summary>
+                <p>
+                  独立 CUDA stream 提前搬下一批，当前批次继续计算。比如计算
+                  300ms、搬运 20ms，串行约 320ms，理想重叠后接近
+                  300ms；这是原理示意，实际收益由完整训练测量。
+                </p>
+              </details>
+              <details>
+                <summary>
+                  <span class="detail-index">03</span
+                  >编译程序，每张图依然重新算<span
+                    class="detail-plus"
+                    aria-hidden="true"
+                    >+</span
+                  >
+                </summary>
+                <p>
+                  Inductor 优化冻结 backbone
+                  的执行，减少可融合算子的启动和中间写回。缓存的是执行代码，不是所有图像的特征；保存的参数仍可用于
+                  eager 评测。
+                </p>
+              </details>
+              <details>
+                <summary>
+                  <span class="detail-index">04</span
+                  >看完整计时窗口，也看任务效果<span
+                    class="detail-plus"
+                    aria-hidden="true"
+                    >+</span
+                  >
+                </summary>
+                <p>
+                  平均 it/s、步骤长尾、SM
+                  波动和成功率一起看。固定输入用于排除加载影响，Profiler
+                  独立短跑；启动失败和协议不一致的评测不计入正式结果。
+                </p>
+              </details>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section shell" id="data" aria-labelledby="data-title">
+        <div class="section-heading">
+          <div>
+            <div class="eyebrow">03 / DATA FORMATS</div>
+            <h2 id="data-title">同一份数据，两种读取方式。</h2>
+          </div>
+          <p>LeRobot → Lance。<br />明确什么被保留，什么需要重新编码。</p>
+        </div>
+        <div
+          class="table-scroll format-table"
+          tabindex="0"
+          role="region"
+          aria-label="LeRobot 转 Lance 格式支持"
+        >
+          <table>
+            <thead>
+              <tr>
+                <th scope="col">LeRobot 源格式</th>
+                <th scope="col">Lance 目标格式</th>
+                <th scope="col">支持情况</th>
+                <th scope="col">实际处理</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <th scope="row">Video / MP4</th>
+                <td>Video</td>
+                <td><span class="supported">支持</span></td>
+                <td>保留原始 MP4 字节，不重新编码</td>
+              </tr>
+              <tr>
+                <th scope="row">Video / MP4</th>
+                <td>JPEG blob</td>
+                <td><span class="supported">支持</span></td>
+                <td>解码对应帧，再编码为 JPEG</td>
+              </tr>
+              <tr>
+                <th scope="row">JPEG / image</th>
+                <td>JPEG blob</td>
+                <td><span class="supported">支持</span></td>
+                <td>读取图像后重新编码为 JPEG</td>
+              </tr>
+              <tr>
+                <th scope="row">JPEG / image</th>
+                <td>Video</td>
+                <td><span class="not-yet">尚未实现</span></td>
+                <td>需要额外的视频编码流程</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="data-notes">
+          <p>
+            <strong>当前接收 LeRobot v3.0。</strong>v2
+            数据需先升级；源数据要有完整元数据。JPEG blob 需显式指定
+            <code>--jpeg-storage blob</code>。
+          </p>
+          <p>
+            <strong>重新编码不等于原字节直通。</strong>即使
+            quality=100，也不保证 JPEG 像素完全不变。已有 Lance JPEG 的 blob
+            重排工具则保留 JPEG 字节。
+          </p>
+        </div>
+      </section>
+
+      <section
+        class="start-section shell"
+        id="start"
+        aria-labelledby="start-title"
+      >
+        <div class="start-copy">
+          <div class="eyebrow">04 / GET STARTED</div>
+          <h2 id="start-title">从一份可复现的配置开始。</h2>
+          <p>
+            正式代码、数据转换和训练配置都在代码仓库。先对齐数据、相机与状态维度，再开始训练。
+          </p>
+          <a
+            class="text-link"
+            href="https://github.com/D-Robotics-AI-Lab/RTPolicy/blob/main/docs/README.md"
+            target="_blank"
+            rel="noopener noreferrer"
+            >阅读使用说明 <span aria-hidden="true">↗</span></a
+          >
+          <p class="small-note">
+            安装示例使用已有 RTPolicy 环境；新环境请先按
+            requirements_cluster.txt 配置依赖。仓库访问需要 GitHub 权限。
+          </p>
+        </div>
+        <div class="code-card">
+          <div class="code-tabs" role="group" aria-label="命令示例">
+            <button
+              class="active"
+              type="button"
+              data-code="install"
+              aria-pressed="true"
+            >
+              安装</button
+            ><button type="button" data-code="train" aria-pressed="false">
+              训练</button
+            ><button type="button" data-code="convert" aria-pressed="false">
+              转换</button
+            ><button id="copy-code" type="button" aria-label="复制当前命令">
+              复制
+            </button>
+          </div>
+          <pre><code id="code-example"></code></pre>
+          <p id="code-note" class="code-note"></p>
+          <span id="copy-status" role="status" class="sr-only"></span>
+        </div>
+      </section>
+    </main>
+    <footer class="footer shell">
+      <div>
+        <a class="brand" href="#"
+          >RTPolicy<span class="footer-slash"> / </span></a
+        >
+        <p>机器人策略训练 · 数据管线 · 评测与部署</p>
+      </div>
+      <div class="footer-links">
+        <a
+          href="https://github.com/D-Robotics-AI-Lab/RTPolicy"
+          target="_blank"
+          rel="noopener noreferrer"
+          >代码 ↗</a
+        ><a
+          href="https://github.com/D-Robotics-AI-Lab/RTPolicy.project"
+          target="_blank"
+          rel="noopener noreferrer"
+          >页面源码 ↗</a
+        ><span>实验更新 2026.10.21</span>
+      </div>
+    </footer>
+  </body>
+</html>

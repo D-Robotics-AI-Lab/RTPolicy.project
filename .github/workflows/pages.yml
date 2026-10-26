@@ -1,0 +1,46 @@
+name: Deploy private project page
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: private-pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Require a private repository and private Pages site
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPOSITORY: ${{ github.repository }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          gh api "repos/$REPOSITORY" --jq '.private' | python3 -c 'import sys; assert sys.stdin.read().strip() == "true", "The project repository must stay private."'
+          if ! gh api "repos/$REPOSITORY/pages" > "$RUNNER_TEMP/rtpolicy-pages.json"; then
+            echo "::error::Configure a PRIVATE GitHub Pages site first. Private Pages requires GitHub Enterprise Cloud. No deployment was attempted."
+            exit 1
+          fi
+          python3 -c 'import json, sys; p=json.load(open(sys.argv[1])); assert p.get("public") is False, "Pages must explicitly have public:false before deployment."' "$RUNNER_TEMP/rtpolicy-pages.json"
+      - uses: actions/checkout@v4
+      - name: Package the static page
+        shell: bash
+        run: |
+          mkdir -p "$RUNNER_TEMP/rtpolicy-site"
+          cp index.html styles.css content.js main.js .nojekyll "$RUNNER_TEMP/rtpolicy-site/"
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: ${{ runner.temp }}/rtpolicy-site
+      - name: Deploy existing private Pages site
+        id: deployment
+        uses: actions/deploy-pages@v4
