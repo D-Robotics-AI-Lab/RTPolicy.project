@@ -623,67 +623,31 @@
               id="quantization-evidence"
               aria-labelledby="quantization-evidence-title"
             >
-              <div class="evidence-heading">
-                <div>
-                  <p class="section-label">QUANTIZATION / COMPILER ANALYSIS</p>
-                  <h3 id="quantization-evidence-title">
-                    Explore the original reports.
-                  </h3>
-                </div>
-                <span class="release-status">Archived · Sep 2026</span>
-              </div>
+              <h3 id="quantization-evidence-title">
+                Quantization HTML reports
+              </h3>
               <p>
-                Historical four-core HBDK analysis for the ar5s1 model, compiler
-                target nash-p (HBDK 4.9.6). They document compiler scheduling
-                and per-core performance estimates; the original HTML files open
-                separately.
+                <a
+                  class="text-link"
+                  href="assets/quantization/s600.html"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  >S600 HTML ↗</a
+                >
+                &nbsp;·&nbsp;
+                <a
+                  class="text-link"
+                  href="assets/quantization/s100.html"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  >S100 HTML ↗</a
+                >
               </p>
-              <div class="quantization-report-links">
-                <a
-                  href="assets/quantization/ar5s1-int8-4core.html"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  ><img
-                    src="assets/quantization/int8-overview.webp"
-                    alt="Original HBDK INT8 report overview showing compiler metadata and per-core analysis"
-                    width="1440"
-                    height="1100"
-                    loading="lazy"
-                  /><span>INT8 · 4 CORES</span
-                  ><strong>Compiler performance report ↗</strong
-                  ><small>Self-contained HTML · 23.8 MB</small></a
-                >
-                <a
-                  href="assets/quantization/ar5s1-int16-4core.html"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  ><img
-                    src="assets/quantization/int16-overview.webp"
-                    alt="Original HBDK INT16 report overview showing compiler metadata and per-core analysis"
-                    width="1440"
-                    height="1100"
-                    loading="lazy"
-                  /><span>INT16 · 4 CORES</span
-                  ><strong>Compiler performance report ↗</strong
-                  ><small>Self-contained HTML · 39.8 MB</small></a
-                >
-              </div>
-              <details class="evidence-scope">
-                <summary>
-                  Report provenance and validation scope
-                  <span aria-hidden="true">+</span>
-                </summary>
-                <p>
-                  These compiler reports contain per-core estimated latency/FPS
-                  and scheduling analysis. Their global summary has no
-                  whole-model performance measurement. The archive is associated
-                  with the earlier 148-demonstration / 100K-step ar5s1 model,
-                  and its calibration input is tagged calib_1sample.
-                  Post-quantization task success is not evaluated in these HTML
-                  files; the paper's reported device latency and GPU
-                  task-success tables retain their own protocols.
-                </p>
-              </details>
+              <p>
+                Original self-contained INT16 compiler reports: S600 / nash-p /
+                4 cores; S100 / nash-e / 1 core. Performance entries are
+                compiler estimates.
+              </p>
             </section>
           </div>
           <div class="model-release">

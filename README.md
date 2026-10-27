@@ -66,22 +66,18 @@ three individual keyframes are from Figure 4. No synthetic robot demonstrations 
 used. Original PDFs, extraction contact sheets, and working asset manifests are not
 included in this repository.
 
-## Archived compiler reports
+## Device HTML reports
 
-The quantization panel links to the original INT8 and INT16 four-core HBDK HTML
-reports in `assets/quantization/`. They are self-contained historical compiler
-analyses (nash-p, HBDK 4.9.6), approximately 23.8 MB and 39.8 MB, and open on demand
-without being loaded by the landing page.
+The quantization section links directly to the complete, self-contained HTML files:
 
-Their performance entries are per-core estimates. The global summary contains no
-whole-model board measurement, and these files include no post-quantization
-closed-loop success test. The archived 148-demo / 100K-step ar5s1 model uses a
-calibration input tagged `calib_1sample`. Keep these provenance notes separate
-from the paper-reported latency and GPU success tables.
+- `assets/quantization/s600.html`: S600 / nash-p / INT16 / 4 cores.
+- `assets/quantization/s100.html`: S100 / nash-e / INT16 / 1 core.
 
-The public acknowledgement is limited to DINOv3 and VO-DP; VO-DP paper / code links
-and its BibTeX appear in the citation section. Dataset storage is mentioned only
-as an optional runtime format.
+The original report bytes are preserved. Their performance entries are compiler
+estimates. There are no report screenshots or embedded previews.
+
+Acknowledgements credit DINOv3 and VO-DP; VO-DP paper, code and BibTeX references
+appear in the citation section. Dataset storage receives a brief runtime note.
 
 ## Pending materials
 
