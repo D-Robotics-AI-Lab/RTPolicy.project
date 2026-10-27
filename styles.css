@@ -1936,3 +1936,157 @@ body.dialog-open {
     font-size: 9px;
   }
 }
+
+.related-work-reference {
+  margin-top: 25px;
+  padding-top: 21px;
+  border-top: 1px solid var(--line);
+}
+.related-work-reference > p {
+  padding-right: 0;
+}
+.related-work-reference h3 {
+  font-size: 15px;
+}
+.related-citation summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  list-style: none;
+  font-size: 11px;
+  color: var(--muted);
+}
+.related-citation summary::-webkit-details-marker {
+  display: none;
+}
+.related-citation summary > span {
+  color: var(--blue);
+  font-size: 16px;
+}
+.related-citation[open] summary > span {
+  transform: rotate(45deg);
+}
+.related-citation pre {
+  background: var(--soft);
+  border: 1px solid var(--line);
+  padding: 14px;
+  border-radius: 6px;
+  font: 10px/1.7 var(--mono);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.citation-section > div {
+  min-width: 0;
+}
+.related-work-reference > p {
+  font-size: 11px;
+  line-height: 1.8;
+}
+
+.quantization-evidence {
+  margin-top: 28px;
+  padding-top: 25px;
+  border-top: 1px solid var(--line);
+}
+.evidence-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+  margin-bottom: 15px;
+}
+.evidence-heading .section-label {
+  font-size: 9px;
+  margin-bottom: 10px;
+}
+.evidence-heading h3 {
+  font-size: 19px;
+}
+.quantization-evidence > p {
+  font-size: 11px;
+  color: var(--muted);
+  line-height: 1.85;
+}
+.quantization-report-links {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-top: 19px;
+}
+.quantization-report-links a {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  padding: 20px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: var(--soft);
+}
+.quantization-report-links a:hover {
+  border-color: #9eb6f7;
+}
+.quantization-report-links a > span {
+  font-size: 9px;
+  letter-spacing: 0.08em;
+  color: var(--blue);
+}
+.quantization-report-links strong {
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.6;
+}
+.quantization-report-links small {
+  font-size: 9px;
+  color: var(--muted);
+}
+.evidence-scope {
+  margin-top: 18px;
+}
+.evidence-scope summary {
+  font-size: 10px;
+  color: var(--muted);
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  list-style: none;
+}
+.evidence-scope summary::-webkit-details-marker {
+  display: none;
+}
+.evidence-scope summary > span {
+  color: var(--blue);
+}
+.evidence-scope > p {
+  font-size: 10px;
+  color: var(--muted);
+  line-height: 1.9;
+  margin-top: 12px;
+}
+@media (max-width: 680px) {
+  .evidence-heading {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .evidence-heading h3 {
+    font-size: 17px;
+  }
+  .quantization-report-links {
+    grid-template-columns: 1fr;
+  }
+  .quantization-report-links a {
+    padding: 16px;
+  }
+  .quantization-evidence > p {
+    font-size: 10px;
+  }
+}
+
+.quantization-report-links a > img {
+  width: 100%;
+  height: auto;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: #fff;
+}

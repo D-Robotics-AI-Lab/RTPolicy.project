@@ -51,7 +51,7 @@ Content follows the current manuscript prepared on **2026-10-27**:
 - **Physical tasks:** Table VI, 200 demonstrations / 150K training steps / 50 trials
   per task, RTX 4090 evaluation. RTPolicy success is 92% / 94% / 30% across drawer,
   stack-and-cover, and assembly; the mean is 72.0%.
-- **Device inference:** Table VII, batch 1. S600 INT16 is 30.35 ms / 32.9 Hz;
+- **Paper-reported device inference:** Table VII, batch 1. S600 INT16 is 30.35 ms / 32.9 Hz;
   S600 INT8 is 18.59 ms / 53.8 Hz. S100 INT16 is 149.72 ms / 6.7 Hz;
   S100 INT8 is 86.56 ms / 11.6 Hz.
 - **Representation:** Figure 2, three 640 × 480 (W × H) views give 900 patch tokens,
@@ -65,6 +65,23 @@ task success on each edge device. Keep protocol notes alongside updated numbers.
 three individual keyframes are from Figure 4. No synthetic robot demonstrations are
 used. Original PDFs, extraction contact sheets, and working asset manifests are not
 included in this repository.
+
+## Archived compiler reports
+
+The quantization panel links to the original INT8 and INT16 four-core HBDK HTML
+reports in `assets/quantization/`. They are self-contained historical compiler
+analyses (nash-p, HBDK 4.9.6), approximately 23.8 MB and 39.8 MB, and open on demand
+without being loaded by the landing page.
+
+Their performance entries are per-core estimates. The global summary contains no
+whole-model board measurement, and these files include no post-quantization
+closed-loop success test. The archived 148-demo / 100K-step ar5s1 model uses a
+calibration input tagged `calib_1sample`. Keep these provenance notes separate
+from the paper-reported latency and GPU success tables.
+
+The public acknowledgement is limited to DINOv3 and VO-DP; VO-DP paper / code links
+and its BibTeX appear in the citation section. Dataset storage is mentioned only
+as an optional runtime format.
 
 ## Pending materials
 

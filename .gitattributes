@@ -1,0 +1,2 @@
+# Preserve original compiler report bytes and keep generated payloads out of diffs.
+assets/quantization/*.html -text -diff linguist-generated=true

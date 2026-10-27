@@ -24,14 +24,15 @@ window.RTPOLICY_CONTENT = {
       { device: "S100", latency: 86.56, frequency: 11.6 },
     ],
   },
+  references: { vodp: "https://arxiv.org/abs/2510.15530" },
   commands: {
     install: {
-      code: "git clone git@github.com:D-Robotics-AI-Lab/RTPolicy.git\ncd RTPolicy\n\n# In an existing compatible environment\nconda activate RTPolicy\npython -m pip install -e '.[lance]' --no-deps",
+      code: "git clone git@github.com:D-Robotics-AI-Lab/RTPolicy.git\ncd RTPolicy\n\n# In an existing compatible environment\nconda activate RTPolicy\npython -m pip install -e . --no-deps",
       note: "New environments: install requirements_cluster.txt first. Download pretrained weights and simulation assets separately.",
     },
     train: {
-      code: '# Set a mounted dataset and an output directory\nexport DATASET_DIR=/path/to/lance_jpeg_blob\nexport ARTIFACT_DIR=/path/to/external/storage/rtpolicy\n\ntorchrun --standalone --nproc_per_node=8 main.py \\\n  --config-path=configs/rtpolicy_train \\\n  --config-name=dit_fm_dinov3cnnb_3v_lance_real640_bs256 \\\n  train_dataset.root="$DATASET_DIR" \\\n  train_dataset.task=your_task train_dataset.demo=224 \\\n  output_dir="$ARTIFACT_DIR/train"',
-      note: "The engineering example uses three cameras and 16-D state/actions. Adapt robot dimensions, camera keys, and weight paths before running; this is not a universal benchmark-reproduction command.",
+      code: 'export DATASET_ROOT=/path/to/lerobot/task_parent\nexport ARTIFACT_DIR=/path/to/external/storage/rtpolicy\n\nWANDB_MODE=disabled accelerate launch --config_file configs/accelerate_config.yaml \\\n  main.py --config-path=configs/rtpolicy_train \\\n  --config-name=dit_fm_dinov3cnnl_3v_bs256 \\\n  +observation_config=dinov3cnnl_3v_cnn_b \\\n  train_dataset.path="$DATASET_ROOT" train_dataset.task=beat_block_hammer \\\n  train_dataset.demo=100 horizon=30 n_obs_steps=1 train_dataset.pad_after=28 \\\n  train_batch_size=256 optimizer.lr=2e-4 seed=0 \\\n  output_dir="$ARTIFACT_DIR/train"',
+      note: "Starter example for three-view CNN-base training. Adjust the dataset, robot configuration, GPU count, and training budget for your experiment.",
     },
     export: {
       code: 'export CHECKPOINT_DIR=/path/to/checkpoint\nexport ARTIFACT_DIR=/path/to/external/storage/rtpolicy\n\npython -m drrm.trainer.onnx \\\n  --checkpoint-dir "$CHECKPOINT_DIR" \\\n  --onnx-path "$ARTIFACT_DIR/model.onnx" \\\n  --device cpu --export-dtype fp32 \\\n  --image-preprocess-in-onnx --verify',

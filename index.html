@@ -419,7 +419,7 @@
           <div class="section-heading">
             <p class="section-label">02 / MODEL OVERVIEW</p>
             <h2 id="results-title">
-              Measured on tasks.<br /><span>Timed on devices.</span>
+              Evaluated on tasks.<br /><span>Profiled for deployment.</span>
             </h2>
             <p class="section-subtitle">
               Task success and edge inference are reported under their own
@@ -542,9 +542,7 @@
             <div class="results-topline">
               <div>
                 <h3>From the workstation to the edge</h3>
-                <p>
-                  Device inference measurements · quantization-specific results
-                </p>
+                <p>Paper-reported latency · quantization-specific results</p>
               </div>
               <div
                 class="precision-switch"
@@ -619,6 +617,74 @@
               Device speed alone does not establish task success after
               quantization.
             </p>
+
+            <section
+              class="quantization-evidence"
+              id="quantization-evidence"
+              aria-labelledby="quantization-evidence-title"
+            >
+              <div class="evidence-heading">
+                <div>
+                  <p class="section-label">QUANTIZATION / COMPILER ANALYSIS</p>
+                  <h3 id="quantization-evidence-title">
+                    Explore the original reports.
+                  </h3>
+                </div>
+                <span class="release-status">Archived · Sep 2026</span>
+              </div>
+              <p>
+                Historical four-core HBDK analysis for the ar5s1 model, compiler
+                target nash-p (HBDK 4.9.6). They document compiler scheduling
+                and per-core performance estimates; the original HTML files open
+                separately.
+              </p>
+              <div class="quantization-report-links">
+                <a
+                  href="assets/quantization/ar5s1-int8-4core.html"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  ><img
+                    src="assets/quantization/int8-overview.webp"
+                    alt="Original HBDK INT8 report overview showing compiler metadata and per-core analysis"
+                    width="1440"
+                    height="1100"
+                    loading="lazy"
+                  /><span>INT8 · 4 CORES</span
+                  ><strong>Compiler performance report ↗</strong
+                  ><small>Self-contained HTML · 23.8 MB</small></a
+                >
+                <a
+                  href="assets/quantization/ar5s1-int16-4core.html"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  ><img
+                    src="assets/quantization/int16-overview.webp"
+                    alt="Original HBDK INT16 report overview showing compiler metadata and per-core analysis"
+                    width="1440"
+                    height="1100"
+                    loading="lazy"
+                  /><span>INT16 · 4 CORES</span
+                  ><strong>Compiler performance report ↗</strong
+                  ><small>Self-contained HTML · 39.8 MB</small></a
+                >
+              </div>
+              <details class="evidence-scope">
+                <summary>
+                  Report provenance and validation scope
+                  <span aria-hidden="true">+</span>
+                </summary>
+                <p>
+                  These compiler reports contain per-core estimated latency/FPS
+                  and scheduling analysis. Their global summary has no
+                  whole-model performance measurement. The archive is associated
+                  with the earlier 148-demonstration / 100K-step ar5s1 model,
+                  and its calibration input is tagged calib_1sample.
+                  Post-quantization task success is not evaluated in these HTML
+                  files; the paper's reported device latency and GPU
+                  task-success tables retain their own protocols.
+                </p>
+              </details>
+            </section>
           </div>
           <div class="model-release">
             <span class="release-icon" aria-hidden="true">↓</span>
@@ -660,6 +726,10 @@
               Use an existing compatible Python environment or install the
               locked dependencies. Pretrained visual weights, datasets,
               simulation assets, and policy checkpoints are prepared separately.
+            </p>
+            <p>
+              LeRobot is the default dataset format; optional Lance storage is
+              also supported.
             </p>
             <a
               class="text-link"
@@ -759,26 +829,6 @@
               </p></a
             >
           </div>
-          <details class="engineering-note">
-            <summary>
-              Training efficiency: Lance, prefetching, and backbone compilation
-              <span aria-hidden="true">+</span>
-            </summary>
-            <p>
-              The runtime also includes Lance JPEG / video readers, mmap-based
-              image I/O, bounded prefetching, overlapping CPU-to-GPU transfers,
-              and optional compilation of the frozen visual backbone. These
-              engineering measurements have their own protocols; they are not
-              substituted for the paper's task-success results.
-            </p>
-            <a
-              class="text-link"
-              href="https://github.com/D-Robotics-AI-Lab/RTPolicy/blob/main/docs/performance_optimization.md"
-              target="_blank"
-              rel="noopener noreferrer"
-              >Explore the efficiency notes ↗</a
-            >
-          </details>
         </div>
       </section>
 
@@ -791,17 +841,67 @@
           <p class="section-label">ACKNOWLEDGEMENTS & CITATION</p>
           <h2 id="citation-title">Built on shared research.</h2>
           <p>
-            We thank the DINOv3, RoboTwin, and open-source robotics communities.
-            Please refer to the repository for dependency-specific terms.
+            We thank the authors of
+            <a
+              class="text-link"
+              href="https://github.com/facebookresearch/dinov3"
+              target="_blank"
+              rel="noopener noreferrer"
+              >DINOv3</a
+            >
+            and
+            <a
+              class="text-link"
+              href="https://github.com/D-Robotics-AI-Lab/DRRM"
+              target="_blank"
+              rel="noopener noreferrer"
+              >VO-DP</a
+            >
+            for sharing their research and code.
           </p>
         </div>
         <div class="citation-placeholder">
           <span aria-hidden="true">“</span>
           <h3>Citation</h3>
           <p>
-            BibTeX and the paper link will be added with the manuscript release.
+            RTPolicy BibTeX and the paper link will be added with the manuscript
+            release.
           </p>
           <span class="release-status">To be added</span>
+          <div class="related-work-reference">
+            <h3>Related work: VO-DP</h3>
+            <p>
+              Ni et al., 2025 · Semantic-Geometric Adaptive Diffusion Policy for
+              Vision-Only Robotic Manipulation.
+            </p>
+            <p>
+              <a
+                class="text-link"
+                href="https://arxiv.org/abs/2510.15530"
+                target="_blank"
+                rel="noopener noreferrer"
+                >Paper ↗</a
+              >
+              &nbsp;
+              <a
+                class="text-link"
+                href="https://github.com/D-Robotics-AI-Lab/DRRM"
+                target="_blank"
+                rel="noopener noreferrer"
+                >Code ↗</a
+              >
+            </p>
+            <details class="related-citation">
+              <summary>VO-DP BibTeX <span aria-hidden="true">+</span></summary>
+              <pre><code>@article{ni2025vodp,
+  title={{VO-DP}: Semantic-Geometric Adaptive Diffusion Policy for Vision-Only Robotic Manipulation},
+  author={Ni, Zehao and He, Yonghao and Qian, Lingfeng and Mao, Jilei and Fu, Fa and Sui, Wei and Su, Hu and Peng, Junran and Wang, Zhipeng and He, Bin},
+  journal={arXiv preprint arXiv:2510.15530},
+  year={2025},
+  url={https://arxiv.org/abs/2510.15530}
+}</code></pre>
+            </details>
+          </div>
         </div>
       </section>
     </main>
