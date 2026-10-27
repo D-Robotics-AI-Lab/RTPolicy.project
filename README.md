@@ -111,6 +111,10 @@ It is copied byte-for-byte; no segment or re-encoded preview replaces the full M
 `assets/demo/poster.webp` is taken at 2 seconds. The runtime repository README uses
 a short continuous Conveyor Picking GIF that links to this complete video.
 
+GitHub Raw serves MP4/WebM as file downloads (`application/octet-stream`). The
+project player uses local/hosted media paths with `video/mp4` / `video/webm`; the
+runtime README provides an animated preview and a clearly labelled full-MP4 download.
+
 The demo includes architecture, simulation, conveyor picking, and assembly-related
 scenarios. It is presented separately from the paper's quantitative task tables.
 The navy, ice-white, and cyan branding follows its title card.
