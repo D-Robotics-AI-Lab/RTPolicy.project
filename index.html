@@ -106,9 +106,9 @@
           <button class="resource unavailable" type="button" disabled>
             <span aria-hidden="true">▤</span> Paper <small>Coming soon</small>
           </button>
-          <button class="resource unavailable" type="button" disabled>
-            <span aria-hidden="true">▷</span> Video <small>Coming soon</small>
-          </button>
+          <a class="resource video-resource" href="#demo"
+            ><span aria-hidden="true">▷</span> Video <small>2:18</small></a
+          >
           <button class="resource unavailable" type="button" disabled>
             <span aria-hidden="true">↓</span> Models <small>Coming soon</small>
           </button>
@@ -155,7 +155,8 @@
           <figcaption>
             Real experiments. Three manipulation tasks.
             <span
-              >Paper keyframes shown here; demonstration videos to follow.</span
+              >Paper experiment keyframes. The full demonstration is available
+              below.</span
             >
           </figcaption>
         </figure>
@@ -182,9 +183,60 @@
       <section class="news wrap" aria-labelledby="updates-title">
         <h2 id="updates-title"><span aria-hidden="true">↗</span> Updates</h2>
         <p>
-          The RTPolicy code and project page are being prepared for release.
-          Paper, videos, and model downloads will be linked here when available.
+          The RTPolicy code and project page are being prepared for release. The
+          full demonstration video is available below. Paper and model downloads
+          will be linked when available.
         </p>
+      </section>
+
+      <section
+        id="demo"
+        class="section demo-video-section"
+        aria-labelledby="video-title"
+      >
+        <div class="wrap">
+          <div class="section-heading split-heading">
+            <div>
+              <p class="section-label">WATCH / RTPolicy IN ACTION</p>
+              <h2 id="video-title">
+                From observation<br /><span>to action.</span>
+              </h2>
+            </div>
+            <p>
+              The complete author-provided RTPolicy demonstration.<br />Playback
+              speeds are annotated in the video.
+            </p>
+          </div>
+          <div class="demo-player">
+            <video
+              id="rtpolicy-demo-video"
+              controls
+              playsinline
+              preload="metadata"
+              poster="assets/demo/poster.webp"
+              width="1920"
+              height="1080"
+            >
+              <source
+                src="assets/demo/RTPolicy.mp4"
+                type='video/mp4; codecs="avc1.640028"'
+              />
+              <source src="assets/demo/RTPolicy.webm" type="video/webm" />
+              <p>
+                Your browser does not support HTML5 video.
+                <a href="assets/demo/RTPolicy.mp4"
+                  >Download the complete MP4.</a
+                >
+              </p>
+            </video>
+          </div>
+          <div class="demo-video-footer">
+            <span>Full demonstration · 2:18 · 1920 × 1080</span
+            ><a href="assets/demo/RTPolicy.mp4" download="RTPolicy.mp4"
+              >Download original MP4 ↓</a
+            >
+          </div>
+        </div>
       </section>
 
       <section
@@ -328,7 +380,7 @@
           </div>
           <p>
             Three physical manipulation tasks from the paper.<br />These are
-            real experiment images; demonstration videos will follow.
+            still frames from the paper experiments.
           </p>
         </div>
         <div class="demo-grid">
@@ -354,9 +406,7 @@
                 Open the drawer, place a block inside, and close it with
                 coordinated two-arm actions.
               </p>
-              <span class="video-note"
-                ><span aria-hidden="true">▷</span> Video to be added</span
-              >
+              <span class="video-note">Paper experiment · still frame</span>
             </div>
           </article>
           <article class="demo-card">
@@ -378,9 +428,7 @@
             <div class="demo-card-body">
               <h3>Stack and cover</h3>
               <p>Coordinate a sequence of object interactions.</p>
-              <span class="video-note"
-                ><span aria-hidden="true">▷</span> Video to be added</span
-              >
+              <span class="video-note">Paper experiment · still frame</span>
             </div>
           </article>
           <article class="demo-card">
@@ -402,9 +450,7 @@
             <div class="demo-card-body">
               <h3>Assemble components</h3>
               <p>Bring parts together in a contact-rich task.</p>
-              <span class="video-note"
-                ><span aria-hidden="true">▷</span> Video to be added</span
-              >
+              <span class="video-note">Paper experiment · still frame</span>
             </div>
           </article>
         </div>
@@ -719,10 +765,10 @@
             <div class="repository-map">
               <span>1.2 / REPOSITORY STRUCTURE</span
               ><a
-                href="https://github.com/D-Robotics-AI-Lab/RTPolicy/tree/main/drrm"
+                href="https://github.com/D-Robotics-AI-Lab/RTPolicy/tree/main/rtpolicy"
                 target="_blank"
                 rel="noopener noreferrer"
-                ><code>drrm/</code
+                ><code>rtpolicy/</code
                 ><span>Policy, datasets & training ↗</span></a
               ><a
                 href="https://github.com/D-Robotics-AI-Lab/RTPolicy/tree/main/configs"
@@ -786,7 +832,7 @@
                 training settings.
               </p></a
             ><a
-              href="https://github.com/D-Robotics-AI-Lab/RTPolicy/blob/main/drrm/trainer/onnx.py"
+              href="https://github.com/D-Robotics-AI-Lab/RTPolicy/blob/main/rtpolicy/trainer/onnx.py"
               target="_blank"
               rel="noopener noreferrer"
               ><span>02 / EXPORT</span>

@@ -34,7 +34,7 @@ window.RTPOLICY_CONTENT = {
       note: "Starter example for three-view CNN-base training. Adjust the dataset, robot configuration, GPU count, and training budget for your experiment.",
     },
     export: {
-      code: 'export CHECKPOINT_DIR=/path/to/checkpoint\nexport ARTIFACT_DIR=/path/to/external/storage/rtpolicy\n\npython -m drrm.trainer.onnx \\\n  --checkpoint-dir "$CHECKPOINT_DIR" \\\n  --onnx-path "$ARTIFACT_DIR/model.onnx" \\\n  --device cpu --export-dtype fp32 \\\n  --image-preprocess-in-onnx --verify',
+      code: 'export CHECKPOINT_DIR=/path/to/checkpoint\nexport ARTIFACT_DIR=/path/to/external/storage/rtpolicy\n\npython -m rtpolicy.trainer.onnx \\\n  --checkpoint-dir "$CHECKPOINT_DIR" \\\n  --onnx-path "$ARTIFACT_DIR/model.onnx" \\\n  --device cpu --export-dtype fp32 \\\n  --image-preprocess-in-onnx --verify',
       note: "Export requires a compatible checkpoint and ONNX dependencies. Target-device INT8 / INT16 toolchain instructions will be added with the deployment release.",
     },
   },

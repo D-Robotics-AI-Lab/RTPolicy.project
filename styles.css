@@ -2090,3 +2090,96 @@ body.dialog-open {
   border-radius: 4px;
   background: #fff;
 }
+
+/* Brand colors follow the actual RTPolicy demonstration title card. */
+.hero-wordmark {
+  background: linear-gradient(
+    105deg,
+    #071727 12%,
+    #174f82 42%,
+    #128a9c 72%,
+    #65c8d1 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.hero-wordmark > span {
+  color: inherit;
+}
+.hero-wordmark > i {
+  color: #178b9f;
+}
+.hero h1 {
+  background: linear-gradient(105deg, #061220 4%, #245b86 38%, #1596a7 86%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.hero h1 .title-frequency {
+  color: #168c9d;
+}
+.video-resource {
+  border-color: #b5dbe1;
+  color: #106e80;
+  background: #f3fbfc;
+}
+.demo-video-section {
+  background: linear-gradient(160deg, #061220, #102a3e);
+  color: #eaf2fa;
+  margin-top: 36px;
+}
+.demo-video-section .section-label {
+  color: #7ed3d9;
+}
+.demo-video-section .section-heading h2 span {
+  color: #7ed3d9;
+}
+.demo-video-section .split-heading > p {
+  color: #9fb0c0;
+}
+.demo-player {
+  overflow: hidden;
+  background: #061220;
+  border: 1px solid #7ed3d930;
+  border-radius: 12px;
+  box-shadow: 0 20px 70px #0003;
+}
+.demo-player video {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 16/9;
+  object-fit: contain;
+  background: #061220;
+}
+.demo-video-footer {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  padding-top: 18px;
+  color: #8996a6;
+  font-size: 11px;
+}
+.demo-video-footer a {
+  color: #7ed3d9;
+}
+.demo-video-footer a:hover {
+  text-decoration: underline;
+}
+.demo-video-section .section-heading {
+  margin-bottom: 30px;
+}
+@media (max-width: 680px) {
+  .demo-video-section {
+    margin-top: 23px;
+  }
+  .demo-video-footer {
+    font-size: 9px;
+    gap: 14px;
+    flex-wrap: wrap;
+  }
+  .demo-player {
+    border-radius: 7px;
+  }
+}

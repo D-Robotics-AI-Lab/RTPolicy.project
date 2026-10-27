@@ -38,7 +38,9 @@ through SSH. The local preview is independent of GitHub Pages hosting.
 | `assets/`    | Actual paper figures / keyframes and the code-native wordmark / favicon          |
 
 The overview images open the paper figures at full resolution. Demonstration cards
-contain **still frames**, not videos. The results panel supports keyboard navigation.
+contain the paper’s still frames. A separate native HTML5 player shows the full
+RTPolicy demonstration; its playback speeds are annotated in the video. The results
+panel supports keyboard navigation.
 Animations respect reduced-motion preferences.
 
 ## Results and evidence
@@ -99,9 +101,27 @@ initialize their interactive charts before the navigation and summaries appear.
 The repository currently has no configured GitHub Pages site; Raw links do not
 provide an online-rendered report page.
 
+## Demonstration video
+
+`assets/demo/RTPolicy.mp4` is the complete 137.967-second original video provided
+by the authors: 1920 × 1080, 30 fps, H.264/yuv420p, silent, with faststart metadata.
+It is copied byte-for-byte; no segment or re-encoded preview replaces the full MP4.
+`assets/demo/RTPolicy.webm` is an additional full-length VP9 compatibility version
+(1080p30, all 4139 source frames) for browsers without an H.264 decoder.
+`assets/demo/poster.webp` is taken at 2 seconds. The runtime repository README uses
+a short continuous Conveyor Picking GIF that links to this complete video.
+
+The demo includes architecture, simulation, conveyor picking, and assembly-related
+scenarios. It is presented separately from the paper's quantitative task tables.
+The navy, ice-white, and cyan branding follows its title card.
+
+The runtime Python package is `rtpolicy`; command examples and code links use that
+namespace. Pre-existing checkpoint metadata is handled by the runtime migration
+compatibility path.
+
 ## Pending materials
 
-Paper / arXiv, videos, downloadable models, device toolchain packages, and BibTeX
+Paper / arXiv, downloadable models, device toolchain packages, and BibTeX
 remain visibly marked **Coming soon / To be added** until verified URLs are available.
 Do not replace them with dummy links or unverified release claims.
 
