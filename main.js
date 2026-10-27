@@ -28,15 +28,7 @@
   }
   for (const result of data.real) {
     const row = el("tr", undefined, result.ours ? "highlight" : "");
-    const label = el("th");
-    if (result.name === "VO-DP") {
-      const reference = el("a", result.name);
-      reference.href = data.references.vodp;
-      reference.target = "_blank";
-      reference.rel = "noopener noreferrer";
-      reference.className = "text-link";
-      label.append(reference);
-    } else label.textContent = result.name;
+    const label = el("th", result.name);
     label.scope = "row";
     row.append(label);
     result.scores.forEach((score) => row.append(el("td", `${score}%`)));

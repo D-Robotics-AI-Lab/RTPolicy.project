@@ -76,8 +76,28 @@ The quantization section links directly to the complete, self-contained HTML fil
 The original report bytes are preserved. Their performance entries are compiler
 estimates. There are no report screenshots or embedded previews.
 
-Acknowledgements credit DINOv3 and VO-DP; VO-DP paper, code and BibTeX references
-appear in the citation section. Dataset storage receives a brief runtime note.
+Acknowledgements are maintained in `index.html`. Benchmark tables retain the
+method names reported in the paper. Dataset storage receives a brief runtime note.
+
+### View the reports as webpages
+
+The files are complete HTML applications. GitHub's file and Raw interfaces are
+source/download interfaces, not a website host. Save a report with its `.html`
+extension and open it with Chrome or Edge, or serve this repository locally:
+
+```bash
+python3 -m http.server 8000 --bind 127.0.0.1
+```
+
+Then open these URLs on the same machine:
+
+- `http://127.0.0.1:8000/assets/quantization/s600.html`
+- `http://127.0.0.1:8000/assets/quantization/s100.html`
+
+For a remote server, forward that port to your browser machine. These large reports
+initialize their interactive charts before the navigation and summaries appear.
+The repository currently has no configured GitHub Pages site; Raw links do not
+provide an online-rendered report page.
 
 ## Pending materials
 

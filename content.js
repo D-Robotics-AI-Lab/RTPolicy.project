@@ -24,7 +24,6 @@ window.RTPOLICY_CONTENT = {
       { device: "S100", latency: 86.56, frequency: 11.6 },
     ],
   },
-  references: { vodp: "https://arxiv.org/abs/2510.15530" },
   commands: {
     install: {
       code: "git clone git@github.com:D-Robotics-AI-Lab/RTPolicy.git\ncd RTPolicy\n\n# In an existing compatible environment\nconda activate RTPolicy\npython -m pip install -e . --no-deps",
