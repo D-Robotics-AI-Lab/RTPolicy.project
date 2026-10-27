@@ -1,20 +1,22 @@
-# RTPolicy.project
+# RTPolicy · Project page
 
-RTPolicy 的独立项目主页仓库。代码仓库：[D-Robotics-AI-Lab/RTPolicy](https://github.com/D-Robotics-AI-Lab/RTPolicy)。
+A paper-first project page for **RTPolicy: Real-Time (32.9 Hz) Multi-View
+Visuomotor Policy for Robotic Manipulation on Edge Devices**.
 
-项目介绍以模型为主：DINOv3-CNN、多视角交替注意力、空间 Adapter、DiT / Flow Matching 和任务表现。Lance、读取与训练加速收在技术附录。
+[Runtime repository](https://github.com/D-Robotics-AI-Lab/RTPolicy) ·
+[Repository presentation](https://github.com/D-Robotics-AI-Lab/RTPolicy#readme)
 
-纯 HTML / CSS / JavaScript，无框架、安装或构建步骤；没有外部字体、跟踪器或第三方脚本。
+The presentation follows the research-release structure used by DOSOD:
+introduction and method, model overview and results, getting started, training /
+export / inference, and acknowledgements / citation. Real experiment images and
+paper figures are the primary visual material.
 
-## 当前状态
+## Preview
 
-仓库保持 **Private**，网页源码可以在本地预览，尚未启用托管站点。当前组织是 GitHub Free；访问受限的 GitHub Pages 需要 GitHub Enterprise Cloud。私有仓库和私有网页是两回事，不能把仓库设为 Private 就假定网页也受限。
+This is a buildless HTML / CSS / JavaScript site. No framework, package installation,
+external fonts, analytics, or third-party scripts are required.
 
-参考：[GitHub Pages 站点可见性](https://docs.github.com/en/pages/getting-started-with-github-pages/changing-the-visibility-of-your-github-pages-site)。
-
-## 预览
-
-下载或克隆本仓库后，直接用浏览器打开 `index.html` 即可。也可以在本机启动：
+Open `index.html` directly, or run a local preview:
 
 ```bash
 git clone git@github.com:D-Robotics-AI-Lab/RTPolicy.project.git
@@ -22,43 +24,67 @@ cd RTPolicy.project
 python3 -m http.server 8000 --bind 127.0.0.1
 ```
 
-在同一台机器打开 `http://127.0.0.1:8000`。在远程服务器运行时，请通过 SSH 转发端口访问，不要把该预览服务暴露到公网。
+Open `http://127.0.0.1:8000` on that machine. For a remote server, forward the port
+through SSH. The local preview is independent of GitHub Pages hosting.
 
-## 页面需要一直开着本地服务吗
+## Update the presentation
 
-- **直接打开本地 index.html：**不需要启动服务，只在自己的浏览器中预览。
-- **用本地 HTTP 服务预览：**服务停止后，该预览地址不能继续加载；已经打开的页面可能仍能暂时显示。
-- **正式部署到 GitHub Pages：**GitHub 托管静态文件，不依赖个人电脑、当前终端或训练服务器持续运行。GitHub Actions 只在构建/发布时运行。
-- **当前状态：**仓库是 Private，Pages 尚未上线。以后可以只公开页面仓库并发布主页，代码仓库继续 Private；真正限制访客访问的私有 Pages 则要求 Enterprise Cloud。
+| File         | Content                                                                          |
+| ------------ | -------------------------------------------------------------------------------- |
+| `index.html` | Paper identity, authors, sections, protocol notes, resource placeholders         |
+| `styles.css` | Responsive layout, typography, colors, and visual hierarchy                      |
+| `content.js` | Benchmark rows, precision-specific device results, and command examples          |
+| `main.js`    | Result tabs, device-precision switch, command copying, image viewer, mobile menu |
+| `assets/`    | Actual paper figures / keyframes and the code-native wordmark / favicon          |
 
-## 后续怎么改
+The overview images open the paper figures at full resolution. Demonstration cards
+contain **still frames**, not videos. The results panel supports keyboard navigation.
+Animations respect reduced-motion preferences.
 
-|文件|修改内容|
-|---|---|
-|`index.html`|标题、介绍、章节、链接、实验条件与说明|
-|`content.js`|模型说明、实测数字与命令示例|
-|`styles.css`|配色、间距、字体、桌面与手机布局|
-|`main.js`|表格生成、切换、折叠说明及复制交互|
+## Results and evidence
 
-数字更新时，同时检查首页摘要、表格汇总和对应实验条件。320×240 成功率与640×480效率分开，Video/640成功率未测；不要将速度实验当成质量等效证明。
+Content follows the current manuscript prepared on **2026-10-27**:
 
-## GitHub Pages
+- **Simulation:** Table I, RoboTwin 2.0 clean-to-clean, 50 tasks, 50 demonstrations
+  per task, 100 evaluation episodes per task, task-specific checkpoints. RTPolicy
+  mean success is 52.26% (52.3% rounded). Baselines come from the official leaderboard.
+- **Physical tasks:** Table VI, 200 demonstrations / 150K training steps / 50 trials
+  per task, RTX 4090 evaluation. RTPolicy success is 92% / 94% / 30% across drawer,
+  stack-and-cover, and assembly; the mean is 72.0%.
+- **Device inference:** Table VII, batch 1. S600 INT16 is 30.35 ms / 32.9 Hz;
+  S600 INT8 is 18.59 ms / 53.8 Hz. S100 INT16 is 149.72 ms / 6.7 Hz;
+  S100 INT8 is 86.56 ms / 11.6 Hz.
+- **Representation:** Figure 2, three 640 × 480 (W × H) views give 900 patch tokens,
+  compressed to 12 visual tokens. This is 75× token-count reduction.
 
-已准备手动触发的 `.github/workflows/pages.yml`，没有自动发布。它先检查页面仓库的 Private 状态，以及 Pages 的 `public:false`，再允许部署；未配置私有 Pages 时会停止。
+GPU task success and device latency are different evaluations. The figure frequency
+is policy inference speed, not full camera-to-actuation timing or a measurement of
+task success on each edge device. Keep protocol notes alongside updated numbers.
 
-将来组织支持 Enterprise Cloud 私有 Pages 后：
+`assets/rtpolicy-architecture.webp` is Figure 2. The full task-sequence image and
+three individual keyframes are from Figure 4. No synthetic robot demonstrations are
+used. Original PDFs, extraction contact sheets, and working asset manifests are not
+included in this repository.
 
-1. 在本仓库 Settings → Pages 中选择 GitHub Actions，并确认 **站点可见性为 Private**。
-2. 在 Actions → Deploy private project page 中手动运行。
-3. 以 Pages 设置页返回的地址为准，不假定默认 `github.io` 地址。
+## Pending materials
 
-如果以后希望主页公开，需要明确调整可见性和部署策略；代码仓库可以继续私有。
+Paper / arXiv, videos, downloadable models, device toolchain packages, and BibTeX
+remain visibly marked **Coming soon / To be added** until verified URLs are available.
+Do not replace them with dummy links or unverified release claims.
 
-## 数据来源
+## Hosting
 
-- 2026-10-21：8×A100、原生640×480、100步预热+1000步计时，EFS Video/JPEG 对照。
-- 2026-10-15：320×240、EFS Lance JPEG 五任务训练与匹配协议评测。
-- 2026-10-16：8卡正常输入 / 固定 GPU 输入诊断。
-- [完整实验和讲解](https://horizonrobotics.feishu.cn/wiki/MqF0wlQ9PixLJHkBVwYcTZW6nnf)（需要文档权限）。
+The repository remains private. The existing manually triggered
+`.github/workflows/pages.yml` workflow is retained; it packages the site **including
+assets** and deploys only to an already configured private GitHub Pages site.
+Editing or pushing this source does not make a site public or change repository
+visibility. Direct-file and local HTTP previews work without a hosted site.
 
-页面初稿：2026-10-26。
+## Design references
+
+- [DOSOD](https://github.com/D-Robotics-AI-Lab/DOSOD): release-page structure and numbered sections.
+- [TabletopGen](https://github.com/D-Robotics-AI-Lab/TabletopGen): clean academic presentation and large paper imagery.
+- [XLens](https://github.com/D-Robotics-AI-Lab/XLens): visual evidence and clear research identity.
+
+The RTPolicy page uses its own layout and assets. It does not copy another project's
+claims, author links, badges, or license.

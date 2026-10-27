@@ -38,6 +38,7 @@ jobs:
         run: |
           mkdir -p "$RUNNER_TEMP/rtpolicy-site"
           cp index.html styles.css content.js main.js .nojekyll "$RUNNER_TEMP/rtpolicy-site/"
+          cp -R assets "$RUNNER_TEMP/rtpolicy-site/assets"
       - uses: actions/upload-pages-artifact@v3
         with:
           path: ${{ runner.temp }}/rtpolicy-site

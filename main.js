@@ -2,125 +2,119 @@
 (() => {
   const data = window.RTPOLICY_CONTENT;
   if (!data) return;
-  const cell = (tag, text) => {
+  const el = (tag, text, className) => {
     const node = document.createElement(tag);
-    node.textContent = text;
+    if (text !== undefined) node.textContent = text;
+    if (className) node.className = className;
     return node;
   };
-  const maxSpeed = Math.max(...data.speed.map((row) => row.it));
-  for (const row of data.speed) {
-    const tr = document.createElement("tr");
-    if (row.it === maxSpeed) tr.className = "best";
-    const label = cell("th", row.label);
-    label.scope = "row";
-    tr.append(label);
-    const speed = document.createElement("td");
-    speed.className = "speed-cell";
-    const wrap = document.createElement("div");
-    wrap.className = "speed-value";
-    wrap.append(cell("strong", row.it.toFixed(4)));
-    const bar = document.createElement("span");
-    bar.className = "speed-bar";
-    bar.setAttribute("aria-hidden", "true");
-    const fill = document.createElement("i");
-    fill.style.setProperty("--bar-width", `${(row.it / maxSpeed) * 100}%`);
-    bar.append(fill);
-    wrap.append(bar);
-    speed.append(wrap);
-    tr.append(speed);
-    for (const text of [
-      `${row.sm.toFixed(2)}%`,
-      `${row.sd.toFixed(2)} pp`,
-      `${row.p99.toFixed(2)} ms`,
-    ])
-      tr.append(cell("td", text));
-    document.querySelector("#speed-rows").append(tr);
+  for (const result of data.simulation) {
+    const row = el(
+      "div",
+      undefined,
+      `benchmark-row${result.ours ? " highlight" : ""}`,
+    );
+    row.append(el("span", result.name, "benchmark-name"));
+    const track = el("div", undefined, "benchmark-track");
+    track.setAttribute("aria-hidden", "true");
+    const fill = el("span", undefined, "benchmark-fill");
+    fill.style.width = `${result.value}%`;
+    track.append(fill);
+    row.append(
+      track,
+      el("span", `${result.value.toFixed(1)}%`, "benchmark-value"),
+    );
+    document.querySelector("#simulation-bars").append(row);
   }
-  for (const row of data.quality) {
-    const tr = document.createElement("tr");
-    const label = cell("th", row.task);
+  for (const result of data.real) {
+    const row = el("tr", undefined, result.ours ? "highlight" : "");
+    const label = el("th", result.name);
     label.scope = "row";
-    tr.append(label);
-    const delta = row.after - row.before;
-    for (const text of [
-      `${row.before}%`,
-      `${row.after}%`,
-      `${delta > 0 ? "+" : ""}${delta} pp`,
-    ])
-      tr.append(cell("td", text));
-    document.querySelector("#quality-rows").append(tr);
+    row.append(label);
+    result.scores.forEach((score) => row.append(el("td", `${score}%`)));
+    row.append(el("td", `${result.mean.toFixed(1)}%`));
+    document.querySelector("#real-results").append(row);
   }
-  const average =
-    data.quality.reduce((total, row) => total + row.after, 0) /
-    data.quality.length;
+  function renderEdge(precision) {
+    const container = document.querySelector("#edge-results");
+    container.replaceChildren();
+    for (const result of data.edge[precision]) {
+      const card = el("article", undefined, "edge-device");
+      card.append(el("h4", result.device));
+      const speed = el("strong", `${result.frequency.toFixed(1)} `);
+      speed.append(el("span", "Hz"));
+      card.append(
+        speed,
+        el(
+          "p",
+          `${result.latency.toFixed(2)} ms inference · ${precision.toUpperCase()}`,
+        ),
+      );
+      container.append(card);
+    }
+    document
+      .querySelectorAll("[data-precision]")
+      .forEach((button) =>
+        button.setAttribute(
+          "aria-pressed",
+          String(button.dataset.precision === precision),
+        ),
+      );
+  }
+  renderEdge("int16");
   document
-    .querySelector("#metric-quality")
-    .replaceChildren(
-      document.createTextNode(average.toFixed(1)),
-      cell("span", "%"),
+    .querySelectorAll("[data-precision]")
+    .forEach((button) =>
+      button.addEventListener("click", () =>
+        renderEdge(button.dataset.precision),
+      ),
     );
 
-  const resultTabs = [...document.querySelectorAll("[data-result]")];
-  function selectResult(button, focus = false) {
-    for (const item of resultTabs) {
+  const tabs = [...document.querySelectorAll("[data-result]")];
+  function selectResult(button, focus) {
+    tabs.forEach((item) => {
       const selected = item === button;
       item.setAttribute("aria-selected", String(selected));
       item.tabIndex = selected ? 0 : -1;
-      document.querySelector(`#${item.dataset.result}-panel`).hidden =
+      document.querySelector(`#panel-${item.dataset.result}`).hidden =
         !selected;
-    }
+    });
     if (focus) button.focus();
   }
-  resultTabs.forEach((button, index) => {
-    button.addEventListener("click", () => selectResult(button));
+  tabs.forEach((button, index) => {
+    button.addEventListener("click", () => selectResult(button, false));
     button.addEventListener("keydown", (event) => {
-      let next;
-      if (event.key === "ArrowRight") next = (index + 1) % resultTabs.length;
-      if (event.key === "ArrowLeft")
-        next = (index - 1 + resultTabs.length) % resultTabs.length;
-      if (event.key === "Home") next = 0;
-      if (event.key === "End") next = resultTabs.length - 1;
-      if (next !== undefined) {
+      const keys = {
+        ArrowRight: (index + 1) % tabs.length,
+        ArrowLeft: (index - 1 + tabs.length) % tabs.length,
+        Home: 0,
+        End: tabs.length - 1,
+      };
+      if (event.key in keys) {
         event.preventDefault();
-        selectResult(resultTabs[next], true);
+        selectResult(tabs[keys[event.key]], true);
       }
     });
   });
-  document.querySelectorAll("[data-model]").forEach((button) =>
-    button.addEventListener("click", () => {
-      document.querySelectorAll("[data-model]").forEach((item) => {
-        item.classList.toggle("active", item === button);
-        item.setAttribute("aria-pressed", String(item === button));
-      });
-      data.modelModes[button.dataset.model].forEach((step, index) => {
-        document.querySelector(`#model-step-label-${index}`).textContent =
-          step.label;
-        document.querySelector(`#model-step-title-${index}`).textContent =
-          step.title;
-        document.querySelector(`#model-step-description-${index}`).textContent =
-          step.description;
-      });
-    }),
-  );
-
-  function selectCode(button) {
-    document.querySelectorAll("[data-code]").forEach((item) => {
-      item.classList.toggle("active", item === button);
-      item.setAttribute("aria-pressed", String(item === button));
-    });
-    document.querySelector("#code-example").textContent =
-      data.commands[button.dataset.code].code;
-    document.querySelector("#code-note").textContent =
-      data.commands[button.dataset.code].note;
-    document.querySelector("#copy-code").textContent = "复制";
+  let copyTimer;
+  function selectCommand(button) {
+    document
+      .querySelectorAll("[data-code]")
+      .forEach((item) =>
+        item.setAttribute("aria-pressed", String(item === button)),
+      );
+    const command = data.commands[button.dataset.code];
+    document.querySelector("#code-example").textContent = command.code;
+    document.querySelector("#code-note").textContent = command.note;
+    document.querySelector("#copy-code").textContent = "Copy";
+    clearTimeout(copyTimer);
   }
   document
     .querySelectorAll("[data-code]")
     .forEach((button) =>
-      button.addEventListener("click", () => selectCode(button)),
+      button.addEventListener("click", () => selectCommand(button)),
     );
-  selectCode(document.querySelector('[data-code="install"]'));
-  let copyTimer;
+  selectCommand(document.querySelector('[data-code="install"]'));
   document.querySelector("#copy-code").addEventListener("click", async () => {
     const button = document.querySelector("#copy-code");
     const text = document.querySelector("#code-example").textContent;
@@ -128,26 +122,99 @@
       if (navigator.clipboard && window.isSecureContext)
         await navigator.clipboard.writeText(text);
       else {
-        const area = document.createElement("textarea");
+        const area = el("textarea", text);
         area.value = text;
-        area.style.position = "fixed";
-        area.style.opacity = "0";
+        area.style.cssText = "position:fixed;opacity:0;pointer-events:none";
         document.body.append(area);
         area.select();
         const copied = document.execCommand("copy");
         area.remove();
-        if (!copied) throw new Error("Copy unavailable");
+        if (!copied) throw new Error("Clipboard unavailable");
       }
-      button.textContent = "已复制";
-      document.querySelector("#copy-status").textContent = "当前命令已复制";
-    } catch {
-      button.textContent = "请手动复制";
+      button.textContent = "Copied";
       document.querySelector("#copy-status").textContent =
-        "浏览器未允许复制，请选中命令手动复制";
+        "Command copied to clipboard.";
+    } catch {
+      button.textContent = "Select text";
+      document.querySelector("#copy-status").textContent =
+        "Copy unavailable. Select the command and copy it manually.";
     }
-    clearTimeout(copyTimer);
     copyTimer = setTimeout(() => {
-      button.textContent = "复制";
+      button.textContent = "Copy";
     }, 2200);
   });
+
+  const menuButton = document.querySelector(".menu-toggle");
+  const navigation = document.querySelector("#main-navigation");
+  const closeMenu = () => {
+    navigation.classList.remove("open");
+    menuButton.setAttribute("aria-expanded", "false");
+  };
+  menuButton.addEventListener("click", () => {
+    const open = navigation.classList.toggle("open");
+    menuButton.setAttribute("aria-expanded", String(open));
+  });
+  navigation
+    .querySelectorAll("a")
+    .forEach((link) => link.addEventListener("click", closeMenu));
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") closeMenu();
+  });
+
+  const dialog = document.querySelector("#figure-dialog");
+  document.querySelectorAll("[data-lightbox]").forEach((button) =>
+    button.addEventListener("click", () => {
+      if (!dialog.showModal) {
+        window.open(button.dataset.lightbox, "_blank", "noopener");
+        return;
+      }
+      const image = document.querySelector("#dialog-image");
+      image.src = button.dataset.lightbox;
+      image.alt = button.dataset.caption || button.querySelector("img").alt;
+      document.querySelector("#dialog-caption").textContent =
+        button.dataset.caption;
+      dialog.showModal();
+      document.body.classList.add("dialog-open");
+    }),
+  );
+  document
+    .querySelector("#close-figure")
+    .addEventListener("click", () => dialog.close());
+  dialog.addEventListener("close", () =>
+    document.body.classList.remove("dialog-open"),
+  );
+  dialog.addEventListener("click", (event) => {
+    if (event.target === dialog) {
+      const box = dialog.getBoundingClientRect();
+      if (
+        event.clientX < box.left ||
+        event.clientX > box.right ||
+        event.clientY < box.top ||
+        event.clientY > box.bottom
+      )
+        dialog.close();
+    }
+  });
+
+  if ("IntersectionObserver" in window) {
+    const links = [...navigation.querySelectorAll("a")];
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting)
+            links.forEach((link) =>
+              link.classList.toggle(
+                "current",
+                link.hash === `#${entry.target.id}`,
+              ),
+            );
+        });
+      },
+      { rootMargin: "-15% 0px -55% 0px" },
+    );
+    links.forEach((link) => {
+      const target = document.querySelector(link.hash);
+      if (target) observer.observe(target);
+    });
+  }
 })();
