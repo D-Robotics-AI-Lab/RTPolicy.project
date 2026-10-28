@@ -26,40 +26,22 @@
     );
     document.querySelector("#simulation-bars").append(row);
   }
-  function renderEdge(precision) {
+  function renderEdge() {
     const container = document.querySelector("#edge-results");
     container.replaceChildren();
-    for (const result of data.edge[precision]) {
+    for (const result of data.edge.int16) {
       const card = el("article", undefined, "edge-device");
       card.append(el("h4", result.device));
       const speed = el("strong", `${result.frequency.toFixed(1)} `);
       speed.append(el("span", "Hz"));
       card.append(
         speed,
-        el(
-          "p",
-          `${result.latency.toFixed(2)} ms inference · ${precision.toUpperCase()}`,
-        ),
+        el("p", `${result.latency.toFixed(2)} ms inference · INT16`),
       );
       container.append(card);
     }
-    document
-      .querySelectorAll("[data-precision]")
-      .forEach((button) =>
-        button.setAttribute(
-          "aria-pressed",
-          String(button.dataset.precision === precision),
-        ),
-      );
   }
-  renderEdge("int16");
-  document
-    .querySelectorAll("[data-precision]")
-    .forEach((button) =>
-      button.addEventListener("click", () =>
-        renderEdge(button.dataset.precision),
-      ),
-    );
+  renderEdge();
 
   const tabs = [...document.querySelectorAll("[data-result]")];
   function selectResult(button, focus) {

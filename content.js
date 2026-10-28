@@ -13,10 +13,6 @@ window.RTPOLICY_CONTENT = {
       { device: "S600", latency: 30.35, frequency: 32.9 },
       { device: "S100", latency: 149.72, frequency: 6.7 },
     ],
-    int8: [
-      { device: "S600", latency: 18.59, frequency: 53.8 },
-      { device: "S100", latency: 86.56, frequency: 11.6 },
-    ],
   },
   commands: {
     install: {
@@ -24,12 +20,12 @@ window.RTPOLICY_CONTENT = {
       note: "New environments: install requirements_cluster.txt first. Download pretrained weights and simulation assets separately.",
     },
     train: {
-      code: 'export DATASET_ROOT=/path/to/lerobot/task_parent\nexport ARTIFACT_DIR=/path/to/external/storage/rtpolicy\n\nWANDB_MODE=disabled accelerate launch --config_file configs/accelerate_config.yaml \\\n  main.py --config-path=configs/rtpolicy_train \\\n  --config-name=dit_fm_dinov3cnnl_3v_bs256 \\\n  +observation_config=dinov3cnnl_3v_cnn_b \\\n  train_dataset.path="$DATASET_ROOT" train_dataset.task=beat_block_hammer \\\n  train_dataset.demo=100 horizon=30 n_obs_steps=1 train_dataset.pad_after=28 \\\n  train_batch_size=256 optimizer.lr=2e-4 seed=0 \\\n  output_dir="$ARTIFACT_DIR/train"',
-      note: "Starter example for three-view CNN-base training. Adjust the dataset, robot configuration, GPU count, and training budget for your experiment.",
+      code: 'export TASK=beat_block_hammer\nexport DATASET_ROOT=/path/to/lerobot_v21/$TASK\nexport DINOV3_ROOT=/path/to/dinov3-convnext-large-pretrain-lvd1689m\nexport RUN_DIR=/path/to/external/storage/rtpolicy/$TASK\n\npython main.py \\\n  --config-path=configs/rtpolicy_train \\\n  --config-name=dit_fm_dinov3cnnl_3v \\\n  train_dataset.backend=lerobot \\\n  train_dataset.root="$DATASET_ROOT" train_dataset.task="$TASK" \\\n  train_dataset.demo=null \\\n  model.obs_encoder.emvis_config.backbone_path="$DINOV3_ROOT" \\\n  train_batch_size=8 val_batch_size=8 dataloader_num_workers=4 \\\n  report_to=null output_dir="$RUN_DIR" hydra.run.dir="$RUN_DIR/hydra"',
+      note: "Single-GPU starter with LeRobot v2.1. The Training Guide covers dataset preparation and the optional Lance backend.",
     },
     export: {
       code: 'export CHECKPOINT_DIR=/path/to/checkpoint\nexport ARTIFACT_DIR=/path/to/external/storage/rtpolicy\n\npython -m rtpolicy.trainer.onnx \\\n  --checkpoint-dir "$CHECKPOINT_DIR" \\\n  --onnx-path "$ARTIFACT_DIR/model.onnx" \\\n  --device cpu --export-dtype fp32 \\\n  --image-preprocess-in-onnx --verify',
-      note: "Export requires a compatible checkpoint and ONNX dependencies. Target-device INT8 / INT16 toolchain instructions will be added with the deployment release.",
+      note: "Export requires a compatible checkpoint and ONNX dependencies. NVIDIA TensorRT uses FP16; S600 / S100 use INT16. BPU toolchain instructions will follow.",
     },
   },
 };

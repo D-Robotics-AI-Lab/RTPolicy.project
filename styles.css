@@ -813,26 +813,6 @@ tr.highlight {
 tr.highlight th {
   font-weight: 750;
 }
-.precision-switch {
-  display: flex;
-  gap: 3px;
-  padding: 3px;
-  border: 1px solid var(--line);
-  border-radius: 6px;
-  background: var(--soft);
-}
-.precision-switch button {
-  border: 0;
-  background: none;
-  padding: 6px 13px;
-  font-size: 10px;
-  color: var(--muted);
-  border-radius: 4px;
-}
-.precision-switch button[aria-pressed="true"] {
-  background: var(--blue);
-  color: white;
-}
 .edge-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -1663,13 +1643,6 @@ body.dialog-open {
   .edge-device p {
     font-size: 9px;
   }
-  .precision-switch {
-    padding: 2px;
-  }
-  .precision-switch button {
-    padding: 6px 8px;
-    font-size: 8px;
-  }
   .model-release {
     padding: 18px 16px;
     gap: 12px;
@@ -2232,4 +2205,15 @@ body.dialog-open {
     font-size: 10px;
     padding: 10px 14px;
   }
+}
+
+/* Small, consistent research-section markers. */
+.section-icon {
+  width: 20px;
+  height: 20px;
+  display: inline-block;
+  vertical-align: -5px;
+  margin-right: 7px;
+  color: var(--blue);
+  flex-shrink: 0;
 }

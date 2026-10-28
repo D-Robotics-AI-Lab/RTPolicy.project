@@ -29,13 +29,13 @@ through SSH. The local preview is independent of GitHub Pages hosting.
 
 ## Update the presentation
 
-| File         | Content                                                                          |
-| ------------ | -------------------------------------------------------------------------------- |
-| `index.html` | Paper identity, authors, sections, protocol notes, resource placeholders         |
-| `styles.css` | Responsive layout, typography, colors, and visual hierarchy                      |
-| `content.js` | Benchmark rows, precision-specific device results, and command examples          |
-| `main.js`    | Result tabs, device-precision switch, command copying, image viewer, mobile menu |
-| `assets/`    | Actual paper figures / keyframes and the code-native wordmark / favicon          |
+| File         | Content                                                                  |
+| ------------ | ------------------------------------------------------------------------ |
+| `index.html` | Paper identity, authors, sections, protocol notes, resource placeholders |
+| `styles.css` | Responsive layout, typography, colors, and visual hierarchy              |
+| `content.js` | Benchmark rows, INT16 device results, and command examples               |
+| `main.js`    | Result tabs, command copying, image viewer, mobile menu                  |
+| `assets/`    | Actual paper figures / keyframes and the code-native wordmark / favicon  |
 
 The opening HTML5 player shows the full RTPolicy demonstration. The architecture
 figure opens at full resolution, and benchmark tabs support keyboard navigation.
@@ -48,9 +48,9 @@ Content follows the current manuscript prepared on **2026-10-27**:
 - **Simulation:** Table I, RoboTwin 2.0 clean-to-clean, 50 tasks, 50 demonstrations
   per task, 100 evaluation episodes per task, task-specific checkpoints. RTPolicy
   mean success is 52.26% (52.3% rounded). Baselines come from the official leaderboard.
-- **Paper-reported device inference:** Table VII, batch 1. S600 INT16 is 30.35 ms / 32.9 Hz;
-  S600 INT8 is 18.59 ms / 53.8 Hz. S100 INT16 is 149.72 ms / 6.7 Hz;
-  S100 INT8 is 86.56 ms / 11.6 Hz.
+- **Paper-reported device inference:** S600 INT16 is 30.35 ms / 32.9 Hz;
+  S100 INT16 is 149.72 ms / 6.7 Hz. NVIDIA TensorRT uses FP16. INT8 deployment
+  is not supported in the current release.
 - **Representation:** Figure 2, three 640 × 480 (W × H) views give 900 patch tokens,
   compressed to 12 visual tokens. This is 75× token-count reduction.
 
