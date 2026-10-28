@@ -8,7 +8,7 @@ Visuomotor Policy for Robotic Manipulation on Edge Devices**.
 
 The presentation follows the research-release structure used by DOSOD:
 introduction and method, model overview and results, getting started, training /
-export / inference, and acknowledgements / citation. Real experiment images and
+export / inference, and acknowledgements. Real experiment images and
 paper figures are the primary visual material.
 
 ## Preview
@@ -29,13 +29,13 @@ through SSH. The local preview is independent of GitHub Pages hosting.
 
 ## Update the presentation
 
-| File         | Content                                                                  |
-| ------------ | ------------------------------------------------------------------------ |
-| `index.html` | Paper identity, authors, sections, protocol notes, resource placeholders |
-| `styles.css` | Responsive layout, typography, colors, and visual hierarchy              |
-| `content.js` | Benchmark rows, INT16 device results, and command examples               |
-| `main.js`    | Result tabs, command copying, image viewer, mobile menu                  |
-| `assets/`    | Actual paper figures / keyframes and the code-native wordmark / favicon  |
+| File         | Content                                                                 |
+| ------------ | ----------------------------------------------------------------------- |
+| `index.html` | Paper identity, authors, sections, protocol notes, resource links       |
+| `styles.css` | Responsive layout, typography, colors, and visual hierarchy             |
+| `content.js` | Benchmark rows, INT16 device results, and command examples              |
+| `main.js`    | Result tabs, command copying, image viewer, mobile menu                 |
+| `assets/`    | Actual paper figures / keyframes and the code-native wordmark / favicon |
 
 The opening HTML5 player shows the full RTPolicy demonstration. The architecture
 figure opens at full resolution, and benchmark tabs support keyboard navigation.
@@ -114,11 +114,6 @@ The navy, ice-white, and cyan branding follows its title card.
 The runtime Python package is `rtpolicy`; command examples and code links use that
 namespace. Pre-existing checkpoint metadata is handled by the runtime migration
 compatibility path.
-
-## Pending materials
-
-The RoboTwin2.0 checkpoint table reserves an empty Google Drive cell until its
-real download URL is available.
 
 ## Hosting
 

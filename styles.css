@@ -1058,12 +1058,6 @@ tr.highlight th {
   line-height: 1.9;
   margin: 18px 0 13px;
 }
-.citation-section {
-  display: grid;
-  grid-template-columns: 1fr 0.8fr;
-  gap: 100px;
-  align-items: start;
-}
 .citation-section h2 {
   font-size: 28px;
   letter-spacing: -0.04em;
@@ -1074,30 +1068,6 @@ tr.highlight th {
   color: var(--muted);
   max-width: 500px;
   line-height: 1.8;
-}
-.citation-placeholder {
-  position: relative;
-  border-left: 1px solid var(--line);
-  padding: 6px 0 8px 30px;
-}
-.citation-placeholder > span:first-child {
-  position: absolute;
-  right: 0;
-  top: -10px;
-  font:
-    70px Georgia,
-    serif;
-  color: #e2e9f6;
-}
-.citation-placeholder h3 {
-  font-size: 17px;
-  margin-bottom: 15px;
-}
-.citation-placeholder p {
-  font-size: 12px;
-  color: var(--muted);
-  margin-bottom: 19px;
-  padding-right: 40px;
 }
 .site-footer {
   border-top: 1px solid var(--line);
@@ -1217,9 +1187,6 @@ body.dialog-open {
   .start-grid {
     gap: 35px;
     grid-template-columns: 0.9fr 1.1fr;
-  }
-  .citation-section {
-    gap: 50px;
   }
   .result-panel {
     padding: 27px;
@@ -1729,20 +1696,10 @@ body.dialog-open {
   .engineering-note > p {
     font-size: 11px;
   }
-  .citation-section {
-    grid-template-columns: 1fr;
-    gap: 30px;
-  }
   .citation-section h2 {
     font-size: 26px;
   }
   .citation-section > div > p:not(.section-label) {
-    font-size: 11px;
-  }
-  .citation-placeholder {
-    padding-left: 20px;
-  }
-  .citation-placeholder p {
     font-size: 11px;
   }
   .site-footer {
