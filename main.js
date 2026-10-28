@@ -45,6 +45,17 @@
     );
     document.querySelector("#gpu-bars").append(row);
   }
+  for (const result of data.edge_estimates) {
+    const card = el("div", undefined, "edge-speed");
+    const frequency = el("strong", result.hz.toFixed(1) + " ");
+    frequency.append(el("small", "Hz"));
+    card.append(
+      el("span", result.device, "edge-device"),
+      frequency,
+      el("span", result.latency_ms.toFixed(2) + " ms"),
+    );
+    document.querySelector("#edge-speed-grid").append(card);
+  }
   function selectCommand(button) {
     document
       .querySelectorAll("[data-code]")

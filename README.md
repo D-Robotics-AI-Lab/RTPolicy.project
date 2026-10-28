@@ -24,17 +24,17 @@ Open `http://127.0.0.1:8000` on that machine. Forward the port when working remo
 5. Training and deployment: three practical steps, followed by acknowledgements.
 
 The S100/S600 section presents INT16 quantization and links to the complete compiler
-HTML reports, which document the INT16 compiler output.
+HTML reports. The two speed cards are explicitly labeled as compiler estimates.
 
 ## Files
 
-| File         | Content                                                   |
-| ------------ | --------------------------------------------------------- |
-| `index.html` | Paper identity, sections and resource links               |
-| `styles.css` | Responsive layout and typography                          |
-| `content.js` | Paper metrics, runtime commands and the AI handoff prompt |
-| `main.js`    | Charts, copy buttons, mobile navigation and figure viewer |
-| `assets/`    | Original demonstration, paper figure and HTML reports     |
+| File         | Content                                                               |
+| ------------ | --------------------------------------------------------------------- |
+| `index.html` | Paper identity, sections and resource links                           |
+| `styles.css` | Responsive layout and typography                                      |
+| `content.js` | Paper metrics, compiler estimates, commands and the AI handoff prompt |
+| `main.js`    | Charts, copy buttons, mobile navigation and figure viewer             |
+| `assets/`    | Original demonstration, paper figure and HTML reports                 |
 
 AI setup links to the runtime repository's `docs/AI_SETUP.md`. Keep the handoff
 prompt synchronized with that guide. The guide reads a user-provided checkpoint;
