@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>AI setup &amp; export · RTPolicy</title>
+    <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="../styles.css" />
+  </head>
+  <body class="guide-page">
+    <header class="site-header">
+      <div class="header-inner">
+        <a class="brand" href="../index.html">RT<span>Policy</span></a
+        ><a class="guide-back" href="../index.html#getting-started"
+          >Back to project</a
+        >
+      </div>
+    </header>
+    <main class="guide-content">
+      <h1 id="ai-setup-and-checkpoint-export">
+        AI Setup and Checkpoint Export
+      </h1>
+      <p>
+        Give a coding agent this guide, the
+        <strong>repository URL or checkout</strong>, a
+        <strong
+          >checkpoint<br />
+          directory</strong
+        >, and a writable <strong>external artifact root</strong> (EFS where
+        available).<br />
+        ONNX is the default target; select NVIDIA separately for TensorRT
+        validation.
+      </p>
+      <h2 id="copy-to-your-agent">Copy to your agent</h2>
+      <pre
+        lang="text"
+        class="notranslate"
+      ><code class="notranslate">Follow https://d-robotics-ai-lab.github.io/RTPolicy.project/guides/AI_SETUP.md for https://github.com/D-Robotics-AI-Lab/RTPolicy, using LOCAL_REPO_PATH=/path/to/RTPolicy, CHECKPOINT_DIRECTORY=/path/to/checkpoint, and ARTIFACT_ROOT=/path/to/external/artifacts.
+Create a fresh compatible environment under ARTIFACT_ROOT, route caches and generated files there, and preserve shared environments and the original checkpoint.
+Inspect the checkpoint to derive actual cameras, state/action shapes, history, horizon, active NFE, and preprocessing; preserve those settings and check the native RoboTwin2 image convention.
+Verify rtpolicy imports and export static FP32 ONNX with --verify, explicitly distinguishing synthetic export checks from representative-input validation.
+If I select NVIDIA, also build and validate mixed FP16 separately from BPU INT16; install simulation software or assets only if I request evaluation.
+Return reproducible commands, resolved versions/configuration, I/O, numerical errors and tolerances, artifact paths, and exact missing-resource blockers, keeping generated results outside Git.
+</code></pre>
+      <h2 id="1-inspect-the-checkpoint">1. Inspect the checkpoint</h2>
+      <p>
+        Read <code class="notranslate">config.json</code> and the safetensors
+        header before loading large weights.<br />
+        The current loader requires
+        <code class="notranslate">config.json</code> and
+        <code class="notranslate">model.safetensors</code>; identify missing<br />
+        files or an incompatible weight layout explicitly. Use the installed
+        <code class="notranslate">rtpolicy</code><br />
+        classes and
+        <code class="notranslate"
+          >rtpolicy.common.checkpoint.load_checkpoint_config</code
+        >, which normalizes<br />
+        supported historical class references in memory.
+      </p>
+      <p>
+        Record <code class="notranslate">obs_encoder.rgb_key</code>,
+        <code class="notranslate">shape_meta</code>,
+        <code class="notranslate">action_key</code>/<code class="notranslate"
+          >supervision_key</code
+        >,<br />
+        <code class="notranslate">n_obs_steps</code>,
+        <code class="notranslate">n_image_obs_steps</code>,
+        <code class="notranslate">horizon</code>,
+        <code class="notranslate">n_action_steps</code>, and<br />
+        <code class="notranslate">noise_scheduler.num_inference_timesteps</code>
+        (the active NFE). Resolve the referenced<br />
+        backbone configuration/processor assets and check policy/normalizer
+        weight coverage.<br />
+        Derive shapes from this checkpoint rather than a previous experiment.
+      </p>
+      <p>
+        Default RoboTwin2 D435 source images are
+        <strong>240 × 320 (H × W)</strong>. Preserve the<br />
+        checkpoint's preprocessing, including internal alignment; changing raw
+        image size<br />
+        or NFE requires an explicit experiment request. Keep the source
+        checkpoint unchanged.
+      </p>
+      <h2 id="2-prepare-an-isolated-environment">
+        2. Prepare an isolated environment
+      </h2>
+      <p>
+        Read <code class="notranslate">pyproject.toml</code> (<code
+          class="notranslate"
+          >pyproject.toml</code
+        >) and the<br />
+        dependency reference (<code class="notranslate"
+          >requirements_cluster.txt</code
+        >). Inspect the host and select a<br />
+        compatible interpreter and matched PyTorch/torchvision build before
+        installing<br />
+        repository dependencies. Use a fresh venv or conda prefix under the
+        artifact root.<br />
+        Route package/model caches and temporary files there too (<code
+          class="notranslate"
+          >PIP_CACHE_DIR</code
+        >, <code class="notranslate">HF_HOME</code>,<br />
+        <code class="notranslate">TORCH_HOME</code>,
+        <code class="notranslate">XDG_CACHE_HOME</code>,
+        <code class="notranslate">TMPDIR</code>;
+        <code class="notranslate">CUDA_CACHE_PATH</code> for NVIDIA).<br />
+        Resolve symlinks to confirm the actual storage location.
+      </p>
+      <p>
+        For a CPU ONNX environment, after installing the selected PyTorch pair:
+      </p>
+      <div class="highlight highlight-source-shell">
+        <pre class="notranslate">python -m pip install -e /path/to/RTPolicy
+python -m pip install onnx onnxruntime
+python -m pip check
+python -c <span class="pl-s"><span class="pl-pds">"</span>import rtpolicy, rtpolicy.models; print(rtpolicy.__file__)<span class="pl-pds">"</span></span>
+python -m rtpolicy.trainer.onnx --help</pre>
+      </div>
+      <p>
+        Use <code class="notranslate">onnxruntime-gpu</code> in place of
+        <code class="notranslate">onnxruntime</code> when CUDA verification is
+        selected,<br />
+        and record the provider actually used. Fix dependency or import failures
+        in the<br />
+        isolated environment. Simulator installation and assets belong to an
+        explicitly<br />
+        requested evaluation step.
+      </p>
+      <h2 id="3-export-and-verify-fp32">3. Export and verify FP32</h2>
+      <p>
+        Run from the repository root in the new environment. Substitute the
+        supplied paths;<br />
+        use a fresh artifact directory. This command keeps the checkpoint's
+        sampling settings:
+      </p>
+      <div class="highlight highlight-source-shell">
+        <pre class="notranslate">
+python -m rtpolicy.trainer.onnx \
+  --checkpoint-dir /path/to/checkpoint \
+  --onnx-path /path/to/external/artifacts/model.onnx \
+  --device cpu --export-dtype fp32 --static-batch \
+  --image-preprocess-in-onnx --no-export-modules-as-functions \
+  --calibration-data-dir /path/to/external/artifacts/verification \
+  --no-save-netron-model --verify</pre
+        >
+      </div>
+      <p>
+        The absolute calibration path keeps generated samples and metrics
+        outside the<br />
+        checkpoint directory. Keep the <code class="notranslate">.onnx</code>,
+        its external weight file, and<br />
+        <code class="notranslate">.onnx.metadata.json</code> together; verify
+        their actual I/O against the checkpoint.<br />
+        Read the per-sample
+        <code class="notranslate">verification_metrics.json</code>, require
+        finite outputs, and report<br />
+        both <code class="notranslate">action</code> and
+        <code class="notranslate">action_pred</code> errors and tolerances.
+      </p>
+      <p>
+        The direct CLI uses synthetic inputs by default. Label that result
+        <strong
+          >synthetic<br />
+          export verification</strong
+        >. Replay representative user-provided observations for a<br />
+        real-input numerical check, using the recorded I/O and the same noise
+        trajectory.<br />
+        If those observations are absent, report that check as pending;
+        numerical export<br />
+        verification alone does not establish robot task success. Missing
+        weights or<br />
+        required backbone assets block export until resolved.
+      </p>
+      <h2 id="4-optional-nvidia-mixed-fp16">4. Optional NVIDIA mixed FP16</h2>
+      <p>
+        For a selected NVIDIA target, use an idle GPU and an isolated compatible
+        TensorRT<br />
+        setup with <code class="notranslate">cuda-python</code> and
+        <code class="notranslate">onnxconverter-common</code>. Starting from the
+        verified<br />
+        static FP32 export:
+      </p>
+      <div class="highlight highlight-source-shell">
+        <pre class="notranslate">
+python scripts/fp16_convert.py \
+  /path/to/external/artifacts/model.onnx /path/to/external/artifacts/model-fp16.onnx
+python scripts/build_bench_x86.py build \
+  /path/to/external/artifacts/model-fp16.onnx /path/to/external/artifacts/model-fp16.engine \
+  strongly_typed</pre
+        >
+      </div>
+      <p>
+        Execute the engine on the same saved inputs and compare it with the FP32
+        reference;<br />
+        report finite checks, per-output errors, declared tolerances, and the
+        input source.<br />
+        Sensitive operators remain FP32.
+        <strong>S100/S600 BPU INT16 uses a separate toolchain</strong><br />
+        and needs its own target validation.
+      </p>
+      <h2 id="deliver-the-result">Deliver the result</h2>
+      <p>
+        Write a short report and machine-readable manifest under the artifact
+        root:<br />
+        source revision/checkpoint identity, environment creation and replay
+        commands,<br />
+        resolved package versions, sampling/preprocessing configuration, I/O
+        names/shapes/<br />
+        dtypes, verification input source and metrics, and any remaining
+        blockers.<br />
+        List generated files with real storage paths and cleanup conditions.
+        Leave model<br />
+        artifacts, environments, caches, samples, and reports outside repository
+        commits.
+      </p>
+    </main>
+  </body>
+</html>

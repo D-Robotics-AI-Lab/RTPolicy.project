@@ -1,7 +1,12 @@
-name: Deploy private project page
+name: Deploy public project page
 
 on:
   workflow_dispatch:
+    inputs:
+      expected_sha:
+        description: Full commit SHA approved for this public website deployment
+        required: true
+        type: string
 
 permissions:
   contents: read
@@ -9,7 +14,7 @@ permissions:
   id-token: write
 
 concurrency:
-  group: private-pages
+  group: public-pages
   cancel-in-progress: false
 
 jobs:
@@ -19,29 +24,84 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - name: Require a private repository and private Pages site
+      - name: Require the approved commit and public website repository
         env:
           GH_TOKEN: ${{ github.token }}
           REPOSITORY: ${{ github.repository }}
+          EXPECTED_SHA: ${{ inputs.expected_sha }}
         shell: bash
         run: |
           set -euo pipefail
-          gh api "repos/$REPOSITORY" --jq '.private' | python3 -c 'import sys; assert sys.stdin.read().strip() == "true", "The project repository must stay private."'
+          [[ "$EXPECTED_SHA" =~ ^[0-9a-f]{40}$ ]]
+          test "$GITHUB_SHA" = "$EXPECTED_SHA"
+          test "$REPOSITORY" = "D-Robotics-AI-Lab/RTPolicy.project"
+          gh api "repos/$REPOSITORY" --jq '.private' | python3 -c 'import sys; assert sys.stdin.read().strip() == "false", "Only the public website repository may be published here."'
           if ! gh api "repos/$REPOSITORY/pages" > "$RUNNER_TEMP/rtpolicy-pages.json"; then
-            echo "::error::Configure a PRIVATE GitHub Pages site first. Private Pages requires GitHub Enterprise Cloud. No deployment was attempted."
+            echo "::error::Configure public GitHub Pages with workflow builds for the website repository first. No deployment was attempted."
             exit 1
           fi
-          python3 -c 'import json, sys; p=json.load(open(sys.argv[1])); assert p.get("public") is False, "Pages must explicitly have public:false before deployment."' "$RUNNER_TEMP/rtpolicy-pages.json"
+          python3 -c 'import json, sys; p=json.load(open(sys.argv[1])); assert p.get("public") is True, "The Pages site must explicitly be public."; assert p.get("build_type") == "workflow", "Pages must use workflow builds."' "$RUNNER_TEMP/rtpolicy-pages.json"
       - uses: actions/checkout@v4
-      - name: Package the static page
+        with:
+          persist-credentials: false
+      - name: Package only public website files
         shell: bash
         run: |
-          mkdir -p "$RUNNER_TEMP/rtpolicy-site"
-          cp index.html styles.css content.js main.js .nojekyll "$RUNNER_TEMP/rtpolicy-site/"
-          cp -R assets "$RUNNER_TEMP/rtpolicy-site/assets"
+          set -euo pipefail
+          python3 - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+          import shutil
+
+          source = Path.cwd()
+          runner_temp = Path(os.environ["RUNNER_TEMP"])
+          target = runner_temp / "rtpolicy-site"
+          target.mkdir(parents=True, exist_ok=False)
+          required = ("index.html", "styles.css", "content.js", "main.js", ".nojekyll")
+          for name in required:
+              item = source / name
+              if item.is_symlink() or not item.is_file():
+                  raise SystemExit(f"Expected a regular public website file: {name}")
+              shutil.copy2(item, target / name)
+
+          public_directories = {
+              "assets": {".svg", ".png", ".jpg", ".jpeg", ".gif", ".webp", ".avif", ".ico", ".mp4", ".webm", ".html", ".css", ".js", ".woff", ".woff2", ".ttf", ".otf"},
+              "guides": {".md", ".html", ".css", ".js"},
+          }
+          for directory, extensions in public_directories.items():
+              directory_source = source / directory
+              if not directory_source.exists():
+                  if directory == "assets":
+                      raise SystemExit("Missing public assets directory")
+                  continue
+              if directory_source.is_symlink() or not directory_source.is_dir():
+                  raise SystemExit(f"Public directory must be a regular directory: {directory}")
+              for item in sorted(directory_source.rglob("*")):
+                  relative = item.relative_to(source)
+                  if item.is_symlink():
+                      raise SystemExit(f"Symlinks cannot be published: {relative}")
+                  if any(part.startswith(".") for part in relative.parts):
+                      continue
+                  if item.is_dir():
+                      continue
+                  if not item.is_file() or item.suffix.lower() not in extensions:
+                      raise SystemExit(f"Unexpected public asset type: {relative}")
+                  destination = target / relative
+                  destination.parent.mkdir(parents=True, exist_ok=True)
+                  shutil.copy2(item, destination)
+
+          allowed_roots = set(required) | set(public_directories)
+          if any(item.name not in allowed_roots for item in target.iterdir()):
+              raise SystemExit("Unexpected file outside the public website allowlist")
+          manifest = [{"path": str(item.relative_to(target)), "bytes": item.stat().st_size}
+                      for item in sorted(target.rglob("*")) if item.is_file()]
+          (runner_temp / "rtpolicy-site-manifest.json").write_text(json.dumps(manifest, indent=2) + "\n")
+          print(f"Packaged {len(manifest)} public files ({sum(item['bytes'] for item in manifest)} bytes)")
+          PY
       - uses: actions/upload-pages-artifact@v3
         with:
           path: ${{ runner.temp }}/rtpolicy-site
-      - name: Deploy existing private Pages site
+      - name: Deploy the public Pages site
         id: deployment
         uses: actions/deploy-pages@v4

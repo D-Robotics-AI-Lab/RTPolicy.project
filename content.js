@@ -34,8 +34,8 @@ window.RTPOLICY_CONTENT = {
     "Follow https://github.com/D-Robotics-AI-Lab/RTPolicy/blob/main/docs/AI_SETUP.md for https://github.com/D-Robotics-AI-Lab/RTPolicy, using LOCAL_REPO_PATH=/path/to/RTPolicy, CHECKPOINT_DIRECTORY=/path/to/checkpoint, and ARTIFACT_ROOT=/path/to/external/artifacts.\nCreate a fresh compatible environment under ARTIFACT_ROOT, route caches and generated files there, and preserve shared environments and the original checkpoint.\nInspect the checkpoint to derive actual cameras, state/action shapes, history, horizon, active NFE, and preprocessing; preserve those settings and check the native RoboTwin2 image convention.\nVerify rtpolicy imports and export static FP32 ONNX with --verify, explicitly distinguishing synthetic export checks from representative-input validation.\nIf I select NVIDIA, also build and validate mixed FP16 separately from BPU INT16; install simulation software or assets only if I request evaluation.\nReturn reproducible commands, resolved versions/configuration, I/O, numerical errors and tolerances, artifact paths, and exact missing-resource blockers, keeping generated results outside Git.",
   commands: {
     install: {
-      code: "git clone https://github.com/D-Robotics-AI-Lab/RTPolicy.git\ncd RTPolicy\npython -m pip install -e .",
-      note: "Configure the dataset and pretrained weights as described in the Training Guide.",
+      code: "cd /path/to/RTPolicy\npython -m pip install -e .",
+      note: "Use your local source checkout and configure the dataset and pretrained weights in YAML.",
     },
     train: {
       code: "python main.py --config-path=configs/rtpolicy_train \\\n  --config-name=dit_fm_dinov3cnnl_3v",

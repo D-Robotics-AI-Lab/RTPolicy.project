@@ -110,10 +110,14 @@
     () => document.querySelector("#code-example").textContent,
     document.querySelector("#copy-status"),
   );
-  document.querySelector("#ai-prompt").textContent = data.agent_prompt;
+  const publicAgentPrompt = data.agent_prompt.replace(
+    "https://github.com/D-Robotics-AI-Lab/RTPolicy/blob/main/docs/AI_SETUP.md",
+    new URL("guides/AI_SETUP.md", window.location.href).href,
+  );
+  document.querySelector("#ai-prompt").textContent = publicAgentPrompt;
   bindCopy(
     document.querySelector("#copy-ai-prompt"),
-    () => data.agent_prompt,
+    () => publicAgentPrompt,
     document.querySelector("#ai-copy-status"),
   );
   const menu = document.querySelector(".menu-toggle"),
@@ -185,4 +189,270 @@
       if (target) observer.observe(target);
     });
   }
+
+  const motionPreference = window.matchMedia(
+    "(prefers-reduced-motion: reduce)",
+  );
+  const reduced = () => motionPreference.matches;
+  const animate = (node, frames, options) => {
+    if (reduced() || typeof node.animate !== "function") return null;
+    return node.animate(frames, options);
+  };
+  const easing = "cubic-bezier(.2,.7,.2,1)";
+  document
+    .querySelectorAll(
+      ".hero-wordmark,#paper-title,.authors,.affiliations,.resource-links",
+    )
+    .forEach((node, i) => {
+      animate(
+        node,
+        [
+          { opacity: 0.25, transform: "translateY(15px)" },
+          { opacity: 1, transform: "translateY(0)" },
+        ],
+        { duration: 650, delay: i * 65, easing },
+      );
+    });
+  const revealTargets = document.querySelectorAll(
+    ".section-heading,.intro-text,.paper-figure,.method-steps,.method-tour,.metric-card,.result-card,.quantization-evidence,.setup-card,.repository-layout,.deployment-card,.acknowledgements",
+  );
+  if ("IntersectionObserver" in window) {
+    const revealObserver = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries)
+          if (entry.isIntersecting) {
+            revealObserver.unobserve(entry.target);
+            entry.target.dataset.revealed = "true";
+            animate(
+              entry.target,
+              [
+                { opacity: 0.35, transform: "translateY(18px)" },
+                { opacity: 1, transform: "translateY(0)" },
+              ],
+              {
+                duration: 620,
+                delay: Math.min(
+                  Number(entry.target.dataset.revealDelay) || 0,
+                  180,
+                ),
+                easing,
+              },
+            );
+          }
+      },
+      { threshold: 0.08 },
+    );
+    revealTargets.forEach((node, i) => {
+      node.dataset.revealDelay = String((i % 3) * 55);
+      revealObserver.observe(node);
+    });
+    const chartObserver = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries)
+          if (entry.isIntersecting) {
+            chartObserver.unobserve(entry.target);
+            entry.target.dataset.chartPlayed = "true";
+            entry.target
+              .querySelectorAll(".benchmark-fill")
+              .forEach((fill, i) =>
+                animate(
+                  fill,
+                  [{ transform: "scaleX(.03)" }, { transform: "scaleX(1)" }],
+                  { duration: 900, delay: i * 70, easing },
+                ),
+              );
+          }
+      },
+      { threshold: 0.3 },
+    );
+    document
+      .querySelectorAll("#simulation-bars,#gpu-bars")
+      .forEach((node) => chartObserver.observe(node));
+  }
+  document
+    .querySelectorAll(".benchmark-fill")
+    .forEach((node) => (node.style.transformOrigin = "left"));
+  const progress = document.querySelector(".reading-progress span"),
+    backToTop = document.querySelector(".back-to-top");
+  let scrollFrame = 0;
+  function updateScroll() {
+    scrollFrame = 0;
+    const max = document.documentElement.scrollHeight - window.innerHeight;
+    const value = max > 0 ? Math.max(0, Math.min(1, window.scrollY / max)) : 0;
+    progress.style.transform = `scaleX(${value})`;
+    backToTop.classList.toggle(
+      "visible",
+      window.scrollY > window.innerHeight * 0.8,
+    );
+  }
+  window.addEventListener(
+    "scroll",
+    () => {
+      if (!scrollFrame) scrollFrame = requestAnimationFrame(updateScroll);
+    },
+    { passive: true },
+  );
+  window.addEventListener("resize", updateScroll, { passive: true });
+  updateScroll();
+  backToTop.addEventListener("click", () =>
+    window.scrollTo({ top: 0, behavior: reduced() ? "auto" : "smooth" }),
+  );
+  const cardNodes = document.querySelectorAll(
+    ".metric-card,.result-card,.setup-card,.deployment-card,.repository-layout,.edge-speed",
+  );
+  cardNodes.forEach((card) => {
+    card.classList.add("motion-card");
+    let frame = 0,
+      last = null;
+    const reset = () => {
+      if (frame) cancelAnimationFrame(frame);
+      frame = 0;
+      last = null;
+      card.classList.remove("is-pointed");
+      card.style.removeProperty("transform");
+    };
+    card.addEventListener(
+      "pointermove",
+      (event) => {
+        if (
+          reduced() ||
+          !window.matchMedia("(hover: hover) and (pointer: fine)").matches ||
+          event.pointerType === "touch"
+        )
+          return;
+        last = { x: event.clientX, y: event.clientY };
+        if (frame) return;
+        frame = requestAnimationFrame(() => {
+          frame = 0;
+          if (!last) return;
+          const r = card.getBoundingClientRect();
+          const x = Math.max(0, Math.min(1, (last.x - r.left) / r.width)),
+            y = Math.max(0, Math.min(1, (last.y - r.top) / r.height));
+          card.style.setProperty("--pointer-x", `${x * 100}%`);
+          card.style.setProperty("--pointer-y", `${y * 100}%`);
+          card.classList.add("is-pointed");
+          card.style.transform = `perspective(1000px) rotateX(${(0.5 - y) * 2}deg) rotateY(${(x - 0.5) * 2}deg) translateY(-2px)`;
+        });
+      },
+      { passive: true },
+    );
+    card.addEventListener("pointerleave", reset);
+    card.addEventListener("pointercancel", reset);
+  });
+  const stages = [
+    {
+      tag: "01 / OBSERVATION",
+      title: "Observe the scene",
+      description:
+        "Three RGB camera views and the current robot state provide complementary observations of the scene.",
+    },
+    {
+      tag: "02 / REPRESENTATION",
+      title: "Connect the camera views",
+      description:
+        "A shared frozen DINOv3 ConvNeXt backbone extracts visual features. View-aware fusion combines information across cameras before compression.",
+    },
+    {
+      tag: "03 / COMPRESSION",
+      title: "Keep a compact scene representation",
+      description:
+        "Spatial compression keeps a 2 × 2 token grid per view. In the paper's three-view 480 × 640 setting, 900 visual tokens become 12.",
+    },
+    {
+      tag: "04 / ACTION GENERATION",
+      title: "Generate an action chunk",
+      description:
+        "The flow-matching DiT conditions on visual tokens and robot state. The reported setup uses four Euler integration steps to generate the action sequence.",
+    },
+  ];
+  const stageButtons = [...document.querySelectorAll("[data-method-stage]")],
+    stagePanel = document.querySelector("#method-stage-panel"),
+    playButton = document.querySelector("#method-autoplay");
+  let activeStage = 0,
+    flowTimer = 0;
+  function stopFlow() {
+    if (flowTimer) clearInterval(flowTimer);
+    flowTimer = 0;
+    playButton.textContent = "Play flow";
+    playButton.setAttribute("aria-pressed", "false");
+    stagePanel.setAttribute("aria-live", "polite");
+  }
+  function selectStage(index, manual = false) {
+    activeStage = (index + stages.length) % stages.length;
+    const stage = stages[activeStage];
+    if (manual) stopFlow();
+    stagePanel.setAttribute("aria-live", flowTimer ? "off" : "polite");
+    stageButtons.forEach((button, i) => {
+      const selected = i === activeStage;
+      button.setAttribute("aria-selected", String(selected));
+      button.tabIndex = selected ? 0 : -1;
+    });
+    stagePanel.setAttribute("aria-labelledby", `method-step-${activeStage}`);
+    document.querySelector("#stage-tag").textContent = stage.tag;
+    document.querySelector("#stage-title").textContent = stage.title;
+    document.querySelector("#stage-description").textContent =
+      stage.description;
+    document.querySelector("#stage-position").textContent =
+      `${activeStage + 1} / ${stages.length}`;
+    animate(
+      stagePanel,
+      [
+        { opacity: 0.45, transform: "translateY(5px)" },
+        { opacity: 1, transform: "translateY(0)" },
+      ],
+      { duration: 260, easing },
+    );
+  }
+  stageButtons.forEach((button, i) => {
+    button.addEventListener("click", () => selectStage(i, true));
+    button.addEventListener("keydown", (event) => {
+      const keys = {
+        ArrowRight: (i + 1) % stages.length,
+        ArrowLeft: (i + stages.length - 1) % stages.length,
+        Home: 0,
+        End: stages.length - 1,
+      };
+      if (event.key in keys) {
+        event.preventDefault();
+        selectStage(keys[event.key], true);
+        stageButtons[keys[event.key]].focus();
+      }
+    });
+  });
+  playButton.addEventListener("click", () => {
+    if (flowTimer) {
+      stopFlow();
+      return;
+    }
+    if (reduced()) return;
+    playButton.textContent = "Pause flow";
+    playButton.setAttribute("aria-pressed", "true");
+    stagePanel.setAttribute("aria-live", "off");
+    flowTimer = setInterval(() => selectStage(activeStage + 1), 2600);
+  });
+  if ("IntersectionObserver" in window) {
+    new IntersectionObserver(
+      (entries) => {
+        if (!entries[0].isIntersecting) stopFlow();
+      },
+      { threshold: 0.05 },
+    ).observe(document.querySelector(".method-tour"));
+  }
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) stopFlow();
+  });
+  const onMotionChange = () => {
+    if (reduced()) {
+      stopFlow();
+      document.getAnimations?.().forEach((a) => a.cancel());
+      cardNodes.forEach((card) => {
+        card.classList.remove("is-pointed");
+        card.style.removeProperty("transform");
+      });
+    }
+  };
+  if (motionPreference.addEventListener)
+    motionPreference.addEventListener("change", onMotionChange);
+  else motionPreference.addListener(onMotionChange);
+  selectStage(0);
 })();
