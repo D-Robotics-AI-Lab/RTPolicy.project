@@ -2130,13 +2130,15 @@ body.dialog-open {
   justify-content: center;
   padding: 11px 18px;
   border-radius: 7px;
-  background: linear-gradient(110deg, #153a61, #107d8f);
-  color: #fff;
-  font-size: 11px;
+  border: 1px solid #d0d7de;
+  background: #f6f8fa;
+  color: #24292f;
+  font-size: 12px;
   font-weight: 600;
 }
 .file-download:hover {
-  filter: brightness(1.08);
+  background: #eef1f5;
+  border-color: #b8c2ce;
 }
 .checkpoint-models {
   width: 100%;
@@ -2159,7 +2161,7 @@ body.dialog-open {
     margin-top: 25px;
   }
   .file-download {
-    font-size: 10px;
+    font-size: 12px;
     padding: 10px 14px;
   }
 }
