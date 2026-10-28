@@ -24,7 +24,7 @@ window.RTPOLICY_CONTENT = {
       note: "Single-GPU starter with LeRobot v2.1. The Training Guide covers dataset preparation and the optional Lance backend.",
     },
     export: {
-      code: 'export CHECKPOINT_DIR=/path/to/checkpoint\nexport ARTIFACT_DIR=/path/to/external/storage/rtpolicy\n\npython -m rtpolicy.trainer.onnx \\\n  --checkpoint-dir "$CHECKPOINT_DIR" \\\n  --onnx-path "$ARTIFACT_DIR/model.onnx" \\\n  --device cpu --export-dtype fp32 \\\n  --image-preprocess-in-onnx --verify',
+      code: 'export CHECKPOINT_DIR=/path/to/checkpoint\nexport ARTIFACT_DIR=/path/to/external/storage/rtpolicy\n\npython -m rtpolicy.trainer.onnx \\\n  --checkpoint-dir "$CHECKPOINT_DIR" \\\n  --onnx-path "$ARTIFACT_DIR/model.onnx" \\\n  --device cpu --export-dtype fp32 --static-batch \\\n  --image-preprocess-in-onnx --verify',
       note: "Export requires a compatible checkpoint and ONNX dependencies. NVIDIA TensorRT uses FP16; S600 / S100 use INT16. BPU toolchain instructions will follow.",
     },
   },
