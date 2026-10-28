@@ -49,8 +49,7 @@ Content follows the current manuscript prepared on **2026-10-27**:
   per task, 100 evaluation episodes per task, task-specific checkpoints. RTPolicy
   mean success is 52.26% (52.3% rounded). Baselines come from the official leaderboard.
 - **Paper-reported device inference:** S600 INT16 is 30.35 ms / 32.9 Hz;
-  S100 INT16 is 149.72 ms / 6.7 Hz. NVIDIA TensorRT uses FP16. INT8 deployment
-  is not supported in the current release.
+  S100 INT16 is 149.72 ms / 6.7 Hz. NVIDIA TensorRT uses FP16.
 - **Representation:** Figure 2, three 640 × 480 (W × H) views give 900 patch tokens,
   compressed to 12 visual tokens. This is 75× token-count reduction.
 
