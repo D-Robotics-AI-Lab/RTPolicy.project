@@ -70,8 +70,12 @@
   selectCommand(document.querySelector('[data-code="install"]'));
   async function copyText(value) {
     if (navigator.clipboard && window.isSecureContext) {
-      await navigator.clipboard.writeText(value);
-      return;
+      try {
+        await navigator.clipboard.writeText(value);
+        return;
+      } catch {
+        // Fall through to the user-gesture copy path.
+      }
     }
     const box = document.createElement("textarea");
     box.value = value;
@@ -86,20 +90,38 @@
   const timers = new Map();
   function bindCopy(button, read, status) {
     const label = button.textContent;
+    const originalAriaLabel = button.getAttribute("aria-label");
+    button.style.minWidth =
+      Math.ceil(button.getBoundingClientRect().width) + "px";
     button.addEventListener("click", async () => {
       clearTimeout(timers.get(button));
       try {
         await copyText(read());
-        button.textContent = "Copied";
+        button.textContent = button.id === "copy-code" ? "✓" : "Copied";
+        button.setAttribute("aria-label", "Copied to clipboard");
         status.textContent = "Copied to clipboard.";
       } catch {
-        button.textContent = "Select to copy";
+        button.textContent =
+          button.id === "copy-code" ? label : "Select prompt";
+        const target =
+          button.id === "copy-code"
+            ? document.querySelector("#code-example")
+            : document.querySelector("#ai-prompt");
+        if (button.id === "copy-ai-prompt")
+          document.querySelector(".agent-prompt").open = true;
+        const range = document.createRange();
+        range.selectNodeContents(target);
+        const selection = window.getSelection();
+        selection.removeAllRanges();
+        selection.addRange(range);
         status.textContent = "Select the text and copy it.";
       }
       timers.set(
         button,
         setTimeout(() => {
           button.textContent = label;
+          if (originalAriaLabel === null) button.removeAttribute("aria-label");
+          else button.setAttribute("aria-label", originalAriaLabel);
           status.textContent = "";
         }, 1800),
       );
@@ -344,25 +366,25 @@
       tag: "01 / OBSERVATION",
       title: "Observe the scene",
       description:
-        "Three RGB camera views and the current robot state provide complementary observations of the scene.",
+        "Three RGB views and the current robot state describe the scene. The cameras provide complementary observations.",
     },
     {
       tag: "02 / REPRESENTATION",
-      title: "Connect the camera views",
+      title: "Fuse the camera views",
       description:
-        "A shared frozen DINOv3 ConvNeXt backbone extracts visual features. View-aware fusion combines information across cameras before compression.",
+        "A frozen DINOv3 backbone extracts features. View-aware fusion connects information across the camera views.",
     },
     {
       tag: "03 / COMPRESSION",
-      title: "Keep a compact scene representation",
+      title: "Compress scene features",
       description:
-        "Spatial compression keeps a 2 × 2 token grid per view. In the paper's three-view 480 × 640 setting, 900 visual tokens become 12.",
+        "Each view becomes a 2 × 2 token grid. In the paper's 480 × 640 setup, 900 visual tokens are compressed to 12.",
     },
     {
       tag: "04 / ACTION GENERATION",
       title: "Generate an action chunk",
       description:
-        "The flow-matching DiT conditions on visual tokens and robot state. The reported setup uses four Euler integration steps to generate the action sequence.",
+        "Visual tokens and robot state condition the DiT. In the paper's setup, four Euler steps generate an action chunk.",
     },
   ];
   const stageButtons = [...document.querySelectorAll("[data-method-stage]")],
@@ -454,5 +476,42 @@
   if (motionPreference.addEventListener)
     motionPreference.addEventListener("change", onMotionChange);
   else motionPreference.addListener(onMotionChange);
+  let measureFrame = 0;
+  function measureStagePanel() {
+    measureFrame = 0;
+    const width = stagePanel.getBoundingClientRect().width;
+    if (!width) return;
+    const clone = stagePanel.cloneNode(true);
+    clone.setAttribute("aria-hidden", "true");
+    clone.inert = true;
+    Object.assign(clone.style, {
+      position: "fixed",
+      left: "-10000px",
+      top: "0",
+      visibility: "hidden",
+      width: width + "px",
+      minHeight: "0",
+      maxWidth: "none",
+      pointerEvents: "none",
+    });
+    document.body.append(clone);
+    let height = 0;
+    for (const stage of stages) {
+      clone.querySelector("#stage-tag").textContent = stage.tag;
+      clone.querySelector("#stage-title").textContent = stage.title;
+      clone.querySelector("#stage-description").textContent = stage.description;
+      height = Math.max(height, clone.getBoundingClientRect().height);
+    }
+    clone.remove();
+    stagePanel.style.minHeight = Math.ceil(height) + "px";
+  }
+  const scheduleMeasure = () => {
+    if (!measureFrame) measureFrame = requestAnimationFrame(measureStagePanel);
+  };
+  window.addEventListener("resize", scheduleMeasure, { passive: true });
+  if (motionPreference.addEventListener)
+    motionPreference.addEventListener("change", scheduleMeasure);
+  document.fonts?.ready.then(scheduleMeasure);
   selectStage(0);
+  measureStagePanel();
 })();

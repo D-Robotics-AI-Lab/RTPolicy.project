@@ -1666,3 +1666,31 @@ body.dialog-open {
 .step-number {
   display: block;
 }
+
+/* Keep interactive controls stable while feedback and pipeline text change. */
+.method-step-title {
+  font-weight: 650;
+}
+.stage-tag {
+  font-size: 15px;
+}
+#stage-title {
+  font-size: 24px;
+}
+#stage-description {
+  font-size: 18px;
+  line-height: 1.75;
+}
+#method-autoplay[aria-pressed="true"] {
+  background: #173b53;
+  border-color: #173b53;
+  color: #f3fbff;
+}
+@media (max-width: 560px) {
+  #stage-title {
+    font-size: 22px;
+  }
+  #stage-description {
+    font-size: 17px;
+  }
+}
