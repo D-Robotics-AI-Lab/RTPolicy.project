@@ -101,12 +101,12 @@ by the authors: 1920 × 1080, 30 fps, H.264/yuv420p, silent, with faststart meta
 It is copied byte-for-byte; no segment or re-encoded preview replaces the full MP4.
 `assets/demo/RTPolicy.webm` is an additional full-length VP9 compatibility version
 (1080p30, all 4139 source frames) for browsers without an H.264 decoder.
-`assets/demo/poster.webp` is taken at 2 seconds. The runtime repository README uses
-a short continuous Conveyor Picking GIF that links to this complete video.
+`assets/demo/poster.webp` is taken at 2 seconds. The runtime README embeds the full
+demonstration as a private GitHub video attachment.
 
 GitHub Raw serves MP4/WebM as file downloads (`application/octet-stream`). The
 project player uses local/hosted media paths with `video/mp4` / `video/webm`; the
-runtime README provides an animated preview and a clearly labelled full-MP4 download.
+runtime README embeds the demonstration using GitHub’s native attachment player.
 
 The demo includes architecture, simulation, conveyor picking, and assembly-related
 scenarios. It is presented separately from the paper's quantitative task tables.
