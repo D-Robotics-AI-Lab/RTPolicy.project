@@ -8,12 +8,12 @@ window.RTPOLICY_CONTENT = {
     { name: "ACT", value: 29.7 },
     { name: "Diffusion Policy", value: 28.0 },
   ],
-  edge: {
-    int16: [
-      { device: "S600", latency: 30.35, frequency: 32.9 },
-      { device: "S100", latency: 149.72, frequency: 6.7 },
-    ],
-  },
+  gpu_latency: [
+    { name: "FP32", value: 23.8 },
+    { name: "FP16", value: 10.92, ours: true },
+  ],
+  agent_prompt:
+    "Follow https://github.com/D-Robotics-AI-Lab/RTPolicy/blob/main/docs/AI_SETUP.md for https://github.com/D-Robotics-AI-Lab/RTPolicy, using LOCAL_REPO_PATH=/path/to/RTPolicy, CHECKPOINT_DIRECTORY=/path/to/checkpoint, and ARTIFACT_ROOT=/path/to/external/artifacts.\nCreate a fresh compatible environment under ARTIFACT_ROOT, route caches and generated files there, and preserve shared environments and the original checkpoint.\nInspect the checkpoint to derive actual cameras, state/action shapes, history, horizon, active NFE, and preprocessing; preserve those settings and check the native RoboTwin2 image convention.\nVerify rtpolicy imports and export static FP32 ONNX with --verify, explicitly distinguishing synthetic export checks from representative-input validation.\nIf I select NVIDIA, also build and validate mixed FP16 separately from BPU INT16; install simulation software or assets only if I request evaluation.\nReturn reproducible commands, resolved versions/configuration, I/O, numerical errors and tolerances, artifact paths, and exact missing-resource blockers, keeping generated results outside Git.",
   commands: {
     install: {
       code: "git clone https://github.com/D-Robotics-AI-Lab/RTPolicy.git\ncd RTPolicy\npython -m pip install -e .",

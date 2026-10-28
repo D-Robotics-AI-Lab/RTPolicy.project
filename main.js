@@ -2,11 +2,11 @@
 (() => {
   const data = window.RTPOLICY_CONTENT;
   if (!data) return;
-  const el = (tag, text, className) => {
-    const node = document.createElement(tag);
-    if (text !== undefined) node.textContent = text;
-    if (className) node.className = className;
-    return node;
+  const el = (tag, text, cls) => {
+    const n = document.createElement(tag);
+    if (text !== undefined) n.textContent = text;
+    if (cls) n.className = cls;
+    return n;
   };
   for (const result of data.simulation) {
     const row = el(
@@ -26,114 +26,100 @@
     );
     document.querySelector("#simulation-bars").append(row);
   }
-  function renderEdge() {
-    const container = document.querySelector("#edge-results");
-    container.replaceChildren();
-    for (const result of data.edge.int16) {
-      const card = el("article", undefined, "edge-device");
-      card.append(el("h4", result.device));
-      const speed = el("strong", `${result.frequency.toFixed(1)} `);
-      speed.append(el("span", "Hz"));
-      card.append(
-        speed,
-        el("p", `${result.latency.toFixed(2)} ms inference · INT16`),
-      );
-      container.append(card);
-    }
+  const maxLatency = Math.max(...data.gpu_latency.map((x) => x.value));
+  for (const result of data.gpu_latency) {
+    const row = el(
+      "div",
+      undefined,
+      `latency-row${result.ours ? " highlight" : ""}`,
+    );
+    row.append(el("span", result.name));
+    const track = el("div", undefined, "benchmark-track");
+    track.setAttribute("aria-hidden", "true");
+    const fill = el("span", undefined, "benchmark-fill");
+    fill.style.width = `${(result.value / maxLatency) * 100}%`;
+    track.append(fill);
+    row.append(
+      track,
+      el("span", `${result.value.toFixed(2)} ms`, "latency-value"),
+    );
+    document.querySelector("#gpu-bars").append(row);
   }
-  renderEdge();
-
-  const tabs = [...document.querySelectorAll("[data-result]")];
-  function selectResult(button, focus) {
-    tabs.forEach((item) => {
-      const selected = item === button;
-      item.setAttribute("aria-selected", String(selected));
-      item.tabIndex = selected ? 0 : -1;
-      document.querySelector(`#panel-${item.dataset.result}`).hidden =
-        !selected;
-    });
-    if (focus) button.focus();
-  }
-  tabs.forEach((button, index) => {
-    button.addEventListener("click", () => selectResult(button, false));
-    button.addEventListener("keydown", (event) => {
-      const keys = {
-        ArrowRight: (index + 1) % tabs.length,
-        ArrowLeft: (index - 1 + tabs.length) % tabs.length,
-        Home: 0,
-        End: tabs.length - 1,
-      };
-      if (event.key in keys) {
-        event.preventDefault();
-        selectResult(tabs[keys[event.key]], true);
-      }
-    });
-  });
-  let copyTimer;
   function selectCommand(button) {
     document
       .querySelectorAll("[data-code]")
-      .forEach((item) =>
-        item.setAttribute("aria-pressed", String(item === button)),
-      );
+      .forEach((x) => x.setAttribute("aria-pressed", String(x === button)));
     const command = data.commands[button.dataset.code];
     document.querySelector("#code-example").textContent = command.code;
     document.querySelector("#code-note").textContent = command.note;
-    document.querySelector("#copy-code").textContent = "Copy";
-    clearTimeout(copyTimer);
   }
   document
     .querySelectorAll("[data-code]")
-    .forEach((button) =>
-      button.addEventListener("click", () => selectCommand(button)),
-    );
+    .forEach((x) => x.addEventListener("click", () => selectCommand(x)));
   selectCommand(document.querySelector('[data-code="install"]'));
-  document.querySelector("#copy-code").addEventListener("click", async () => {
-    const button = document.querySelector("#copy-code");
-    const text = document.querySelector("#code-example").textContent;
-    try {
-      if (navigator.clipboard && window.isSecureContext)
-        await navigator.clipboard.writeText(text);
-      else {
-        const area = el("textarea", text);
-        area.value = text;
-        area.style.cssText = "position:fixed;opacity:0;pointer-events:none";
-        document.body.append(area);
-        area.select();
-        const copied = document.execCommand("copy");
-        area.remove();
-        if (!copied) throw new Error("Clipboard unavailable");
-      }
-      button.textContent = "Copied";
-      document.querySelector("#copy-status").textContent =
-        "Command copied to clipboard.";
-    } catch {
-      button.textContent = "Select text";
-      document.querySelector("#copy-status").textContent =
-        "Copy unavailable. Select the command and copy it manually.";
+  async function copyText(value) {
+    if (navigator.clipboard && window.isSecureContext) {
+      await navigator.clipboard.writeText(value);
+      return;
     }
-    copyTimer = setTimeout(() => {
-      button.textContent = "Copy";
-    }, 2200);
-  });
-
-  const menuButton = document.querySelector(".menu-toggle");
-  const navigation = document.querySelector("#main-navigation");
+    const box = document.createElement("textarea");
+    box.value = value;
+    box.style.position = "fixed";
+    box.style.opacity = "0";
+    document.body.append(box);
+    box.select();
+    const ok = document.execCommand("copy");
+    box.remove();
+    if (!ok) throw new Error("Copy unavailable");
+  }
+  const timers = new Map();
+  function bindCopy(button, read, status) {
+    const label = button.textContent;
+    button.addEventListener("click", async () => {
+      clearTimeout(timers.get(button));
+      try {
+        await copyText(read());
+        button.textContent = "Copied";
+        status.textContent = "Copied to clipboard.";
+      } catch {
+        button.textContent = "Select to copy";
+        status.textContent = "Select the text and copy it.";
+      }
+      timers.set(
+        button,
+        setTimeout(() => {
+          button.textContent = label;
+          status.textContent = "";
+        }, 1800),
+      );
+    });
+  }
+  bindCopy(
+    document.querySelector("#copy-code"),
+    () => document.querySelector("#code-example").textContent,
+    document.querySelector("#copy-status"),
+  );
+  document.querySelector("#ai-prompt").textContent = data.agent_prompt;
+  bindCopy(
+    document.querySelector("#copy-ai-prompt"),
+    () => data.agent_prompt,
+    document.querySelector("#ai-copy-status"),
+  );
+  const menu = document.querySelector(".menu-toggle"),
+    nav = document.querySelector("#main-navigation");
   const closeMenu = () => {
-    navigation.classList.remove("open");
-    menuButton.setAttribute("aria-expanded", "false");
+    nav.classList.remove("open");
+    menu.setAttribute("aria-expanded", "false");
   };
-  menuButton.addEventListener("click", () => {
-    const open = navigation.classList.toggle("open");
-    menuButton.setAttribute("aria-expanded", String(open));
-  });
-  navigation
+  menu.addEventListener("click", () =>
+    menu.setAttribute("aria-expanded", String(nav.classList.toggle("open"))),
+  );
+  nav
     .querySelectorAll("a")
-    .forEach((link) => link.addEventListener("click", closeMenu));
-  document.addEventListener("keydown", (event) => {
-    if (event.key === "Escape") closeMenu();
+    .forEach((a) => a.addEventListener("click", closeMenu));
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") closeMenu();
   });
-
   const dialog = document.querySelector("#figure-dialog");
   document.querySelectorAll("[data-lightbox]").forEach((button) =>
     button.addEventListener("click", () => {
@@ -141,9 +127,9 @@
         window.open(button.dataset.lightbox, "_blank", "noopener");
         return;
       }
-      const image = document.querySelector("#dialog-image");
-      image.src = button.dataset.lightbox;
-      image.alt = button.dataset.caption || button.querySelector("img").alt;
+      document.querySelector("#dialog-image").src = button.dataset.lightbox;
+      document.querySelector("#dialog-image").alt =
+        button.querySelector("img").alt;
       document.querySelector("#dialog-caption").textContent =
         button.dataset.caption;
       dialog.showModal();
@@ -156,37 +142,35 @@
   dialog.addEventListener("close", () =>
     document.body.classList.remove("dialog-open"),
   );
-  dialog.addEventListener("click", (event) => {
-    if (event.target === dialog) {
-      const box = dialog.getBoundingClientRect();
+  dialog.addEventListener("click", (e) => {
+    if (e.target === dialog) {
+      const r = dialog.getBoundingClientRect();
       if (
-        event.clientX < box.left ||
-        event.clientX > box.right ||
-        event.clientY < box.top ||
-        event.clientY > box.bottom
+        e.clientX < r.left ||
+        e.clientX > r.right ||
+        e.clientY < r.top ||
+        e.clientY > r.bottom
       )
         dialog.close();
     }
   });
-
   if ("IntersectionObserver" in window) {
-    const links = [...navigation.querySelectorAll("a")];
+    const links = [...nav.querySelectorAll("a")];
     const observer = new IntersectionObserver(
-      (entries) => {
+      (entries) =>
         entries.forEach((entry) => {
           if (entry.isIntersecting)
-            links.forEach((link) =>
-              link.classList.toggle(
-                "current",
-                link.hash === `#${entry.target.id}`,
-              ),
-            );
-        });
-      },
+            links.forEach((a) => {
+              const selected = a.hash === `#${entry.target.id}`;
+              a.classList.toggle("current", selected);
+              if (selected) a.setAttribute("aria-current", "location");
+              else a.removeAttribute("aria-current");
+            });
+        }),
       { rootMargin: "-15% 0px -55% 0px" },
     );
-    links.forEach((link) => {
-      const target = document.querySelector(link.hash);
+    links.forEach((a) => {
+      const target = document.querySelector(a.hash);
       if (target) observer.observe(target);
     });
   }
