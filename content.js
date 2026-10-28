@@ -16,12 +16,12 @@ window.RTPOLICY_CONTENT = {
   },
   commands: {
     install: {
-      code: "git clone git@github.com:D-Robotics-AI-Lab/RTPolicy.git\ncd RTPolicy\n\n# In an existing compatible environment\nconda activate RTPolicy\npython -m pip install -e . --no-deps",
-      note: "New environments: install requirements_cluster.txt first. Download pretrained weights and simulation assets separately.",
+      code: "git clone https://github.com/D-Robotics-AI-Lab/RTPolicy.git\ncd RTPolicy\npython -m pip install -e .",
+      note: "Configure the dataset and pretrained weights as described in the Training Guide.",
     },
     train: {
-      code: 'export TASK=beat_block_hammer\nexport DATASET_ROOT=/path/to/lerobot_v21/$TASK\nexport DINOV3_ROOT=/path/to/dinov3-convnext-large-pretrain-lvd1689m\nexport RUN_DIR=/path/to/external/storage/rtpolicy/$TASK\n\npython main.py \\\n  --config-path=configs/rtpolicy_train \\\n  --config-name=dit_fm_dinov3cnnl_3v \\\n  train_dataset.backend=lerobot \\\n  train_dataset.root="$DATASET_ROOT" train_dataset.task="$TASK" \\\n  train_dataset.demo=null \\\n  model.obs_encoder.emvis_config.backbone_path="$DINOV3_ROOT" \\\n  train_batch_size=8 val_batch_size=8 dataloader_num_workers=4 \\\n  report_to=null output_dir="$RUN_DIR" hydra.run.dir="$RUN_DIR/hydra"',
-      note: "Single-GPU starter with LeRobot v2.1. The Training Guide covers dataset preparation and the optional Lance backend.",
+      code: "python main.py --config-path=configs/rtpolicy_train \\\n  --config-name=dit_fm_dinov3cnnl_3v",
+      note: "Set the dataset path, task, pretrained-weight path and output directory in the configuration first. Lance is optional.",
     },
     export: {
       code: 'export CHECKPOINT_DIR=/path/to/checkpoint\nexport ARTIFACT_DIR=/path/to/external/storage/rtpolicy\n\npython -m rtpolicy.trainer.onnx \\\n  --checkpoint-dir "$CHECKPOINT_DIR" \\\n  --onnx-path "$ARTIFACT_DIR/model.onnx" \\\n  --device cpu --export-dtype fp32 --static-batch \\\n  --image-preprocess-in-onnx --verify',

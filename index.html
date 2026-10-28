@@ -193,10 +193,10 @@
               representation and robot state into continuous action sequences.
             </p>
             <p>
-              At 640 × 480 (W × H) resolution, three camera views produce 900
-              visual patch tokens. The adapter reduces them to 12 conditioning
-              tokens, making the visual-to-action interface compact enough for
-              edge deployment.
+              In the paper's 640 × 480 (W × H) setting, three camera views
+              produce 900 visual patch tokens. The adapter reduces them to 12
+              conditioning tokens, making the visual-to-action interface compact
+              enough for edge deployment.
             </p>
           </div>
         </div>
@@ -406,7 +406,7 @@
             <div class="edge-grid" id="edge-results" aria-live="polite"></div>
             <details class="device-reference">
               <summary>
-                GPU &amp; Jetson reference measurements
+                GPU reference measurements
                 <span aria-hidden="true">+</span>
               </summary>
               <div class="table-scroll">
@@ -431,18 +431,6 @@
                       <td>FP16</td>
                       <td>10.92 ms</td>
                       <td>91.6 Hz</td>
-                    </tr>
-                    <tr>
-                      <th scope="row">Jetson Orin NX 16GB</th>
-                      <td>FP32</td>
-                      <td>266.30 ms</td>
-                      <td>3.8 Hz</td>
-                    </tr>
-                    <tr>
-                      <th scope="row">Jetson Orin NX 16GB</th>
-                      <td>FP16</td>
-                      <td>143.20 ms</td>
-                      <td>7.0 Hz</td>
                     </tr>
                   </tbody>
                 </table>
