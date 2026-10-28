@@ -103,63 +103,31 @@
             ><span aria-hidden="true">⌘</span> Code
             <span aria-hidden="true">↗</span></a
           >
-          <button class="resource unavailable" type="button" disabled>
-            <span aria-hidden="true">▤</span> Paper <small>Coming soon</small>
-          </button>
           <a class="resource video-resource" href="#demo"
             ><span aria-hidden="true">▷</span> Video <small>2:18</small></a
           >
-          <button class="resource unavailable" type="button" disabled>
-            <span aria-hidden="true">↓</span> Models <small>Coming soon</small>
-          </button>
         </div>
-        <figure class="hero-figure">
-          <button
-            class="figure-button hero-triptych"
-            type="button"
-            data-lightbox="assets/rtpolicy-real-world-tasks.webp"
-            data-caption="Real-world task sequences from Figure 4 of the manuscript: drawer manipulation, stack and cover, and workpiece assembly."
-            aria-label="Explore the real-world robot experiment sequences"
+        <div class="demo-player hero-demo" id="demo">
+          <video
+            id="rtpolicy-demo-video"
+            controls
+            playsinline
+            preload="metadata"
+            poster="assets/demo/poster.webp"
+            width="1920"
+            height="1080"
           >
-            <span class="hero-photo"
-              ><img
-                src="assets/task-drawer.webp"
-                alt="Actual robot experiment: manipulating a drawer."
-                width="640"
-                height="480"
-                fetchpriority="high"
-              /><span><small>01</small> Drawer manipulation</span></span
-            >
-            <span class="hero-photo"
-              ><img
-                src="assets/task-stack-cover.webp"
-                alt="Actual robot experiment: stacking objects and placing a cover."
-                width="640"
-                height="480"
-                fetchpriority="high"
-              /><span><small>02</small> Stack &amp; cover</span></span
-            >
-            <span class="hero-photo"
-              ><img
-                src="assets/task-assembly.webp"
-                alt="Actual robot experiment: assembling a workpiece."
-                width="640"
-                height="480"
-                fetchpriority="high"
-              /><span><small>03</small> Workpiece assembly</span></span
-            >
-            <span class="zoom-hint" aria-hidden="true"
-              >Explore the full sequences ↗</span
-            >
-          </button>
-          <figcaption>
-            Real experiments. Three manipulation tasks.
-            <span
-              >Paper experiment keyframes. The full demonstration is available
-              below.</span
-            >
-          </figcaption>
-        </figure>
+            <source
+              src="assets/demo/RTPolicy.mp4"
+              type='video/mp4; codecs="avc1.640028"'
+            />
+            <source src="assets/demo/RTPolicy.webm" type="video/webm" />
+            <p>
+              Your browser does not support HTML5 video.
+              <a href="assets/demo/RTPolicy.mp4">Download the complete MP4.</a>
+            </p>
+          </video>
+        </div>
         <div class="hero-stats" aria-label="Paper at a glance">
           <div>
             <strong>32.9<span> Hz</span></strong>
@@ -187,56 +155,6 @@
           full demonstration video is available below. Paper and model downloads
           will be linked when available.
         </p>
-      </section>
-
-      <section
-        id="demo"
-        class="section demo-video-section"
-        aria-labelledby="video-title"
-      >
-        <div class="wrap">
-          <div class="section-heading split-heading">
-            <div>
-              <p class="section-label">WATCH / RTPolicy IN ACTION</p>
-              <h2 id="video-title">
-                From observation<br /><span>to action.</span>
-              </h2>
-            </div>
-            <p>
-              The complete author-provided RTPolicy demonstration.<br />Playback
-              speeds are annotated in the video.
-            </p>
-          </div>
-          <div class="demo-player">
-            <video
-              id="rtpolicy-demo-video"
-              controls
-              playsinline
-              preload="metadata"
-              poster="assets/demo/poster.webp"
-              width="1920"
-              height="1080"
-            >
-              <source
-                src="assets/demo/RTPolicy.mp4"
-                type='video/mp4; codecs="avc1.640028"'
-              />
-              <source src="assets/demo/RTPolicy.webm" type="video/webm" />
-              <p>
-                Your browser does not support HTML5 video.
-                <a href="assets/demo/RTPolicy.mp4"
-                  >Download the complete MP4.</a
-                >
-              </p>
-            </video>
-          </div>
-          <div class="demo-video-footer">
-            <span>Full demonstration · 2:18 · 1920 × 1080</span
-            ><a href="assets/demo/RTPolicy.mp4" download="RTPolicy.mp4"
-              >Download original MP4 ↓</a
-            >
-          </div>
-        </div>
       </section>
 
       <section
@@ -365,98 +283,6 @@
       </section>
 
       <section
-        id="demonstrations"
-        class="section wrap"
-        aria-labelledby="demo-title"
-      >
-        <div class="section-heading split-heading">
-          <div>
-            <p class="section-label">IN THE REAL WORLD</p>
-            <h2 id="demo-title">
-              One policy design.<br /><span
-                >Different kinds of manipulation.</span
-              >
-            </h2>
-          </div>
-          <p>
-            Three physical manipulation tasks from the paper.<br />These are
-            still frames from the paper experiments.
-          </p>
-        </div>
-        <div class="demo-grid">
-          <article class="demo-card">
-            <button
-              class="figure-button"
-              type="button"
-              data-lightbox="assets/task-drawer.webp"
-              data-caption="Drawer manipulation — a still from the real-world experiment."
-              aria-label="Enlarge drawer-manipulation experiment image"
-            >
-              <img
-                src="assets/task-drawer.webp"
-                alt="Dual-arm robot manipulating a drawer in the real-world experiment."
-                loading="lazy"
-                width="640"
-                height="480"
-              /><span class="photo-label">01 / DRAWER MANIPULATION</span>
-            </button>
-            <div class="demo-card-body">
-              <h3>Drag the drawer</h3>
-              <p>
-                Open the drawer, place a block inside, and close it with
-                coordinated two-arm actions.
-              </p>
-              <span class="video-note">Paper experiment · still frame</span>
-            </div>
-          </article>
-          <article class="demo-card">
-            <button
-              class="figure-button"
-              type="button"
-              data-lightbox="assets/task-stack-cover.webp"
-              data-caption="Block stacking and covering — a still from the real-world experiment."
-              aria-label="Enlarge stacking-and-covering experiment image"
-            >
-              <img
-                src="assets/task-stack-cover.webp"
-                alt="Robot working with blocks and a cover in the real-world experiment."
-                loading="lazy"
-                width="640"
-                height="480"
-              /><span class="photo-label">02 / STACK & COVER</span>
-            </button>
-            <div class="demo-card-body">
-              <h3>Stack and cover</h3>
-              <p>Coordinate a sequence of object interactions.</p>
-              <span class="video-note">Paper experiment · still frame</span>
-            </div>
-          </article>
-          <article class="demo-card">
-            <button
-              class="figure-button"
-              type="button"
-              data-lightbox="assets/task-assembly.webp"
-              data-caption="Component assembly — a still from the real-world experiment."
-              aria-label="Enlarge assembly experiment image"
-            >
-              <img
-                src="assets/task-assembly.webp"
-                alt="Robot positioning components during the real-world assembly task."
-                loading="lazy"
-                width="640"
-                height="480"
-              /><span class="photo-label">03 / ASSEMBLY</span>
-            </button>
-            <div class="demo-card-body">
-              <h3>Assemble components</h3>
-              <p>Bring parts together in a contact-rich task.</p>
-              <span class="video-note">Paper experiment · still frame</span>
-            </div>
-          </article>
-        </div>
-      </section>
-
-      <section
         id="results"
         class="section results-section"
         aria-labelledby="results-title"
@@ -467,10 +293,6 @@
             <h2 id="results-title">
               Evaluated on tasks.<br /><span>Profiled for deployment.</span>
             </h2>
-            <p class="section-subtitle">
-              Task success and edge inference are reported under their own
-              evaluation settings.
-            </p>
           </div>
           <div
             class="result-tabs"
@@ -486,16 +308,6 @@
               data-result="simulation"
             >
               Simulation <span>50 tasks</span></button
-            ><button
-              type="button"
-              role="tab"
-              id="tab-real"
-              aria-selected="false"
-              aria-controls="panel-real"
-              data-result="real"
-              tabindex="-1"
-            >
-              Real-world <span>3 tasks</span></button
             ><button
               type="button"
               role="tab"
@@ -534,47 +346,6 @@
               Table I of the manuscript. Task-specific checkpoints; 100
               evaluation episodes per task. Baseline scores are taken from the
               official leaderboard. The unrounded RTPolicy average is 52.26%.
-            </p>
-          </div>
-          <div
-            id="panel-real"
-            class="result-panel"
-            role="tabpanel"
-            aria-labelledby="tab-real"
-            tabindex="0"
-            hidden
-          >
-            <div class="results-topline">
-              <div>
-                <h3>Physical robot · three manipulation tasks</h3>
-                <p>
-                  200 demonstrations per task · 150K training steps · 50 trials
-                  per task
-                </p>
-              </div>
-              <div class="result-callout">
-                <strong>72.0<span>%</span></strong
-                ><span>mean success rate</span>
-              </div>
-            </div>
-            <div class="table-scroll">
-              <table>
-                <thead>
-                  <tr>
-                    <th scope="col">Policy</th>
-                    <th scope="col">Drawer</th>
-                    <th scope="col">Stack & cover</th>
-                    <th scope="col">Assembly</th>
-                    <th scope="col">Mean</th>
-                  </tr>
-                </thead>
-                <tbody id="real-results"></tbody>
-              </table>
-            </div>
-            <p class="protocol-note">
-              Table VI of the manuscript. These task-success experiments use an
-              RTX 4090 GPU setup. DP / VO-DP use one camera, while π0.5 /
-              RTPolicy use three. Edge latency is measured separately.
             </p>
           </div>
           <div
@@ -655,14 +426,6 @@
                 </table>
               </div>
             </details>
-            <p class="protocol-note">
-              Table VII of the manuscript. INT16: S600 30.35 ms / 32.9 Hz, S100
-              149.72 ms / 6.7 Hz. INT8: S600 18.59 ms / 53.8 Hz, S100 86.56 ms /
-              11.6 Hz. Batch-1 policy latency includes visual encoding and
-              action generation, rather than full camera-to-actuation latency.
-              Device speed alone does not establish task success after
-              quantization.
-            </p>
 
             <section
               class="quantization-evidence"
@@ -672,54 +435,37 @@
               <h3 id="quantization-evidence-title">
                 Quantization HTML reports
               </h3>
-              <p>
+              <p class="report-download-actions">
                 <a
-                  class="text-link"
-                  href="assets/quantization/s600.html"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  >Open S600 report ↗</a
+                  class="file-download"
+                  href="https://github.com/D-Robotics-AI-Lab/RTPolicy.project/releases/download/project-files/s600.html"
+                  >Download S600 HTML ↓</a
+                ><a
+                  class="file-download"
+                  href="https://github.com/D-Robotics-AI-Lab/RTPolicy.project/releases/download/project-files/s100.html"
+                  >Download S100 HTML ↓</a
                 >
-                &nbsp;·&nbsp;
-                <a
-                  class="text-link"
-                  href="assets/quantization/s100.html"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  >Open S100 report ↗</a
-                >
-              </p>
-              <p>
-                Original self-contained INT16 compiler reports: S600 / nash-p /
-                4 cores; S100 / nash-e / 1 core. Performance entries are
-                compiler estimates.
-              </p>
-              <p>
-                <a href="assets/quantization/s600.html" download="s600.html"
-                  >Download S600.html</a
-                >
-                &nbsp;·&nbsp;
-                <a href="assets/quantization/s100.html" download="s100.html"
-                  >Download S100.html</a
-                >
-              </p>
-              <p>
-                Open the reports from this page in a browser, or save the
-                complete .html file and open it with Chrome or Edge. GitHub Raw
-                is a source/download endpoint rather than a hosted webpage.
               </p>
             </section>
           </div>
-          <div class="model-release">
-            <span class="release-icon" aria-hidden="true">↓</span>
-            <div>
+          <div class="model-release" id="checkpoints">
+            <div class="checkpoint-models">
               <h3>Model checkpoints</h3>
-              <p>
-                Download links, input specifications, and deployment
-                configurations will be added with the model release.
-              </p>
+              <table>
+                <thead>
+                  <tr>
+                    <th scope="col">Model</th>
+                    <th scope="col">Google Drive</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <th scope="row">RoboTwin2.0</th>
+                    <td aria-label="Checkpoint link pending"></td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
-            <span class="release-status">To be released</span>
           </div>
         </div>
       </section>
@@ -930,11 +676,7 @@
         aria-label="Close enlarged figure"
       >
         Close <span aria-hidden="true">×</span></button
-      ><img
-        id="dialog-image"
-        src="assets/rtpolicy-real-world-tasks.webp"
-        alt=""
-      />
+      ><img id="dialog-image" src="assets/rtpolicy-architecture.webp" alt="" />
       <p id="dialog-caption"></p>
     </dialog>
   </body>

@@ -26,15 +26,6 @@
     );
     document.querySelector("#simulation-bars").append(row);
   }
-  for (const result of data.real) {
-    const row = el("tr", undefined, result.ours ? "highlight" : "");
-    const label = el("th", result.name);
-    label.scope = "row";
-    row.append(label);
-    result.scores.forEach((score) => row.append(el("td", `${score}%`)));
-    row.append(el("td", `${result.mean.toFixed(1)}%`));
-    document.querySelector("#real-results").append(row);
-  }
   function renderEdge(precision) {
     const container = document.querySelector("#edge-results");
     container.replaceChildren();

@@ -8,12 +8,6 @@ window.RTPOLICY_CONTENT = {
     { name: "ACT", value: 29.7 },
     { name: "Diffusion Policy", value: 28.0 },
   ],
-  real: [
-    { name: "Diffusion Policy", scores: [80, 8, 0], mean: 29.3 },
-    { name: "VO-DP", scores: [84, 34, 4], mean: 40.7 },
-    { name: "π0.5", scores: [88, 56, 12], mean: 52.0 },
-    { name: "RTPolicy", scores: [92, 94, 30], mean: 72.0, ours: true },
-  ],
   edge: {
     int16: [
       { device: "S600", latency: 30.35, frequency: 32.9 },

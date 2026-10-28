@@ -37,10 +37,8 @@ through SSH. The local preview is independent of GitHub Pages hosting.
 | `main.js`    | Result tabs, device-precision switch, command copying, image viewer, mobile menu |
 | `assets/`    | Actual paper figures / keyframes and the code-native wordmark / favicon          |
 
-The overview images open the paper figures at full resolution. Demonstration cards
-contain the paper’s still frames. A separate native HTML5 player shows the full
-RTPolicy demonstration; its playback speeds are annotated in the video. The results
-panel supports keyboard navigation.
+The opening HTML5 player shows the full RTPolicy demonstration. The architecture
+figure opens at full resolution, and benchmark tabs support keyboard navigation.
 Animations respect reduced-motion preferences.
 
 ## Results and evidence
@@ -50,18 +48,13 @@ Content follows the current manuscript prepared on **2026-10-27**:
 - **Simulation:** Table I, RoboTwin 2.0 clean-to-clean, 50 tasks, 50 demonstrations
   per task, 100 evaluation episodes per task, task-specific checkpoints. RTPolicy
   mean success is 52.26% (52.3% rounded). Baselines come from the official leaderboard.
-- **Physical tasks:** Table VI, 200 demonstrations / 150K training steps / 50 trials
-  per task, RTX 4090 evaluation. RTPolicy success is 92% / 94% / 30% across drawer,
-  stack-and-cover, and assembly; the mean is 72.0%.
 - **Paper-reported device inference:** Table VII, batch 1. S600 INT16 is 30.35 ms / 32.9 Hz;
   S600 INT8 is 18.59 ms / 53.8 Hz. S100 INT16 is 149.72 ms / 6.7 Hz;
   S100 INT8 is 86.56 ms / 11.6 Hz.
 - **Representation:** Figure 2, three 640 × 480 (W × H) views give 900 patch tokens,
   compressed to 12 visual tokens. This is 75× token-count reduction.
 
-GPU task success and device latency are different evaluations. The figure frequency
-is policy inference speed, not full camera-to-actuation timing or a measurement of
-task success on each edge device. Keep protocol notes alongside updated numbers.
+Keep benchmark values and device specifications synchronized with the source paper.
 
 `assets/rtpolicy-architecture.webp` is Figure 2. The full task-sequence image and
 three individual keyframes are from Figure 4. No synthetic robot demonstrations are
@@ -125,9 +118,8 @@ compatibility path.
 
 ## Pending materials
 
-Paper / arXiv, downloadable models, device toolchain packages, and BibTeX
-remain visibly marked **Coming soon / To be added** until verified URLs are available.
-Do not replace them with dummy links or unverified release claims.
+The RoboTwin2.0 checkpoint table reserves an empty Google Drive cell until its
+real download URL is available.
 
 ## Hosting
 
