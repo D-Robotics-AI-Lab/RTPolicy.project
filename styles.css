@@ -247,6 +247,30 @@ sup {
   color: var(--muted);
   margin-top: 13px;
 }
+.correspondence {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 6px 24px;
+  margin: 12px auto 0;
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--muted);
+}
+.correspondence > span {
+  white-space: nowrap;
+}
+.correspondence a {
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-color: #a9b7c0;
+  text-underline-offset: 3px;
+}
+.correspondence a:hover,
+.correspondence a:focus-visible {
+  color: var(--blue);
+  text-decoration-color: currentColor;
+}
 .resource-links {
   display: flex;
   justify-content: center;
