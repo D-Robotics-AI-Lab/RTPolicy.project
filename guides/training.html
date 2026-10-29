@@ -54,9 +54,7 @@
         </li>
       </ul>
       <p>
-        The dataset parent and task are initially unset, and the recipe's output
-        path<br />
-        must be replaced. The dataset root is
+        The dataset root is
         <code class="notranslate">train_dataset.path/train_dataset.task</code
         >.<br />
         Keep datasets, weights, and outputs on external storage.
@@ -79,6 +77,17 @@
         <code class="notranslate">train_dataset.dataset_metadata</code> as
         configured.
       </p>
+      <p>
+        For raw RoboTwin2 HDF5 recordings, install the data tools and convert
+        task folders:
+      </p>
+      <div class="highlight highlight-source-shell">
+        <pre
+          class="notranslate"
+        >python -m pip install -e <span class="pl-s"><span class="pl-pds">'</span>.[data]<span class="pl-pds">'</span></span>
+bash scripts/dataset/robotwin2lerobot.sh \
+  /path/to/raw/tasks /path/to/external/lerobot beat_block_hammer</pre>
+      </div>
       <h2 id="train">Train</h2>
       <div class="highlight highlight-source-shell">
         <pre class="notranslate">
