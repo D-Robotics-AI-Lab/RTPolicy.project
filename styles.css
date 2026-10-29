@@ -1633,6 +1633,28 @@ body.dialog-open {
   overflow: auto;
   white-space: pre-wrap;
 }
+.guide-table {
+  max-width: 100%;
+  margin: 20px 0;
+  overflow-x: auto;
+}
+.guide-table table {
+  width: 100%;
+  min-width: 680px;
+  border-collapse: collapse;
+  font-size: 16px;
+  line-height: 1.6;
+}
+.guide-table th,
+.guide-table td {
+  padding: 12px;
+  border: 1px solid var(--line);
+  text-align: left;
+  vertical-align: top;
+}
+.guide-table th {
+  background: var(--soft);
+}
 .guide-content .anchor {
   display: none;
 }

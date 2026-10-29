@@ -16,51 +16,99 @@
         >
       </div>
     </header>
-    <main class="guide-content"><h1 id="training-guide">Training Guide</h1>
-<p>RTPolicy trains directly on LeRobot datasets by default. Lance is optional.<br>
+    <main class="guide-content"><h1 dir="auto" id="training-guide">Training Guide</h1>
+<p dir="auto">RTPolicy trains directly on LeRobot datasets by default. Lance is optional.<br>
 Run commands from the repository root.</p>
-<div class="highlight highlight-source-shell"><pre class="notranslate">python -m pip install -r requirements.txt</pre></div>
-<h2 id="configure">Configure</h2>
-<p>Set the experiment fields in the existing configuration files:</p>
-<ul>
+<div class="highlight highlight-source-shell" dir="auto"><pre class="notranslate">python -m pip install -r requirements.txt</pre></div>
+<h2 dir="auto" id="configure">Configure</h2>
+<p dir="auto">Set the experiment fields in the existing configuration files:</p>
+<ul dir="auto">
 <li>Dataset (<code class="notranslate">configs/rtpolicy_train/dataset_config/demo_separated_dataset.yaml</code>): <code class="notranslate">train_dataset.path</code> (dataset parent) and <code class="notranslate">train_dataset.task</code>.</li>
 <li>Observation encoder (<code class="notranslate">configs/rtpolicy_train/observation_config/dinov3cnnl_3v.yaml</code>): <code class="notranslate">model.obs_encoder.emvis_config.backbone_path</code> (pretrained weight directory).</li>
 <li>Training recipe (<code class="notranslate">configs/rtpolicy_train/dit_fm_dinov3cnnl_3v.yaml</code>): <code class="notranslate">output_dir</code> (a new experiment directory).</li>
 </ul>
-<p>The dataset root is <code class="notranslate">train_dataset.path/train_dataset.task</code>.<br>
+<p dir="auto">The dataset root is <code class="notranslate">train_dataset.path/train_dataset.task</code>.<br>
 Keep datasets, weights, and outputs on external storage.</p>
-<p>The three-view recipe (<code class="notranslate">configs/rtpolicy_train/dit_fm_dinov3cnnl_3v.yaml</code>) uses<br>
+<p dir="auto">The three-view recipe (<code class="notranslate">configs/rtpolicy_train/dit_fm_dinov3cnnl_3v.yaml</code>) uses<br>
 <code class="notranslate">left_cam</code>, <code class="notranslate">right_cam</code>, and <code class="notranslate">head_cam</code>, with 14-dimensional joint states and targets.<br>
 RoboTwin2 source images are <strong>240 × 320 (H × W)</strong>; preprocessing preserves their dimensions.</p>
-<p>The default LeRobot reader uses the <strong>v2.1 layout</strong>: JSONL metadata and per-episode<br>
+<p dir="auto">The default LeRobot reader uses the <strong>v2.1 layout</strong>: JSONL metadata and per-episode<br>
 Parquet files. Keep <code class="notranslate">train_dataset.dataset_metadata</code> as configured.</p>
-<p>For raw RoboTwin2 HDF5 recordings, install the data tools and convert task folders:</p>
-<div class="highlight highlight-source-shell"><pre class="notranslate">bash scripts/dataset/robotwin2lerobot.sh \
+<p dir="auto">For raw RoboTwin2 HDF5 recordings, convert task folders:</p>
+<div class="highlight highlight-source-shell" dir="auto"><pre class="notranslate">bash scripts/dataset/robotwin2lerobot.sh \
   /path/to/raw/tasks /path/to/external/lerobot beat_block_hammer</pre></div>
-<h2 id="train">Train</h2>
-<div class="highlight highlight-source-shell"><pre class="notranslate">python main.py --config-path=configs/rtpolicy_train \
+<h2 dir="auto" id="train">Train</h2>
+<div class="highlight highlight-source-shell" dir="auto"><pre class="notranslate">python main.py --config-path=configs/rtpolicy_train \
   --config-name=dit_fm_dinov3cnnl_3v</pre></div>
-<p>Keep training settings in the selected configuration. Append <code class="notranslate">--cfg job --resolve</code><br>
+<p dir="auto">Keep training settings in the selected configuration. Append <code class="notranslate">--cfg job --resolve</code><br>
 to inspect it without starting training.</p>
-<h2 id="optional-lance">Optional: Lance</h2>
-<p>The converter reads complete <strong>LeRobot v3.0</strong> datasets. Prepare a separate v3.0<br>
+<h2 dir="auto" id="pretrain-and-fine-tune">Pretrain and fine-tune</h2>
+<p dir="auto">These RoboTwin2 recipes use DINOv3 ConvNeXt-Base with three cameras, a batch size<br>
+of 256, and seed 0. Both use <code class="notranslate">horizon: 32</code>, <code class="notranslate">n_obs_steps: 3</code>, and<br>
+<code class="notranslate">n_image_obs_steps: 1</code>: three state observations and the latest image from each<br>
+camera. The action and state dimensions are 14; source images remain 240 × 320.</p>
+<div class="guide-table"><table role="table">
+<thead>
+<tr>
+<th>Stage</th>
+<th>Recipe</th>
+<th>Data</th>
+<th align="right">Updates</th>
+<th align="right">Learning rate</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Pretrain</td>
+<td>pt_dinov3cnnb_3v_lance_300k (<code class="notranslate">configs/rtpolicy_train/pt_dinov3cnnb_3v_lance_300k.yaml</code>)</td>
+<td>Joint-task Lance, 2500 demonstrations</td>
+<td align="right">300K</td>
+<td align="right">2e-4</td>
+</tr>
+<tr>
+<td>Fine-tune</td>
+<td>ft_dinov3cnnb_3v_30k (<code class="notranslate">configs/rtpolicy_train/ft_dinov3cnnb_3v_30k.yaml</code>)</td>
+<td>Single-task LeRobot v2.1, 50 demonstrations</td>
+<td align="right">30K</td>
+<td align="right">2e-5</td>
+</tr>
+</tbody>
+</table></div>
+<p dir="auto">In each recipe, set <code class="notranslate">train_dataset.path</code> to the dataset parent,<br>
+<code class="notranslate">model.obs_encoder.emvis_config.backbone_path</code> to the external DINOv3<br>
+ConvNeXt-Base weights, and <code class="notranslate">output_dir</code> to a new external run directory.</p>
+<p dir="auto">For pretraining, prepare the converted Lance dataset at<br>
+<code class="notranslate">train_dataset.path/joint_finetune_2500</code>; see the Lance conversion instructions<br>
+below. The recipe uses all 2500 demonstrations without a validation split.</p>
+<div class="highlight highlight-source-shell" dir="auto"><pre class="notranslate">python -m pip install -e <span class="pl-s"><span class="pl-pds">'</span>.[lance]<span class="pl-pds">'</span></span>
+python main.py --config-path=configs/rtpolicy_train \
+  --config-name=pt_dinov3cnnb_3v_lance_300k</pre></div>
+<p dir="auto">For fine-tuning, set <code class="notranslate">train_dataset.task</code> (for example, <code class="notranslate">finetune_lift_pot</code>) and<br>
+<code class="notranslate">checkpoint_dir</code> to the final pretrained policy directory containing<br>
+<code class="notranslate">model.safetensors</code>. The recipe initializes policy weights and keeps the<br>
+pretraining normalizer while starting a new optimizer and learning-rate schedule.<br>
+Leave <code class="notranslate">resume_from_checkpoint: null</code> when starting fine-tuning.</p>
+<div class="highlight highlight-source-shell" dir="auto"><pre class="notranslate">python main.py --config-path=configs/rtpolicy_train \
+  --config-name=ft_dinov3cnnb_3v_30k</pre></div>
+<h2 dir="auto" id="optional-lance">Optional: Lance</h2>
+<p dir="auto">The converter reads complete <strong>LeRobot v3.0</strong> datasets. Prepare a separate v3.0<br>
 copy with upstream tools if your source uses an older layout.</p>
-<div class="highlight highlight-source-shell"><pre class="notranslate">python -m pip install -e <span class="pl-s"><span class="pl-pds">'</span>.[lance]<span class="pl-pds">'</span></span>
+<div class="highlight highlight-source-shell" dir="auto"><pre class="notranslate">python -m pip install -e <span class="pl-s"><span class="pl-pds">'</span>.[lance]<span class="pl-pds">'</span></span>
 python tools/lerobot_v30_to_lance.py \
   --root /path/to/lerobot_v3/task \
   --output /path/to/lance/task \
   --mode jpeg --jpeg-storage blob \
   --staging-dir /path/to/scratch</pre></div>
-<p>Use a fresh output directory. Staging needs atomic rename and enough space for<br>
+<p dir="auto">Use a fresh output directory. Staging needs atomic rename and enough space for<br>
 the complete dataset; use local scratch when required by the mount.</p>
-<p>In the dataset configuration, set <code class="notranslate">train_dataset.backend: lance</code>, point<br>
+<p dir="auto">In the dataset configuration, set <code class="notranslate">train_dataset.backend: lance</code>, point<br>
 <code class="notranslate">train_dataset.path</code> to the converted dataset's parent, and set<br>
 <code class="notranslate">train_dataset.dataset_metadata: null</code>. Choose a new <code class="notranslate">output_dir</code>, then use the<br>
 same training command above.</p>
-<h2 id="outputs-and-resume">Outputs and resume</h2>
-<p>Checkpoints and final policy files are written to <code class="notranslate">output_dir</code>. To resume, keep<br>
+<h2 dir="auto" id="outputs-and-resume">Outputs and resume</h2>
+<p dir="auto">Checkpoints and final policy files are written to <code class="notranslate">output_dir</code>. To resume, keep<br>
 the same configuration and output directory and append<br>
 <code class="notranslate">resume_from_checkpoint=latest</code> to the training command.</p>
-<p>For agent-managed setup and checkpoint export, see the <a href="ai-setup.html">AI Setup Guide</a>.</p></main>
+<p dir="auto">For agent-managed setup and checkpoint export, see the <a href="ai-setup.html">AI Setup Guide</a>.</p></main>
   </body>
 </html>
