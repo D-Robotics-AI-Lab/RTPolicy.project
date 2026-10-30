@@ -336,7 +336,8 @@ python scripts/build_bench_x86.py build \
         class="notranslate"
       ><code class="notranslate">Also evaluate lift_pot once with the requested backend using the released evaluation.yaml, NFE4, seed0, and 100 episodes. Prepare the official simulator assets and dependencies on external storage; keep RoboTwin2 task/evaluator code and case selection unchanged. Preserve logs and actual accepted seeds.
 </code></pre>
-      <p dir="auto">
+      <p>For a rebuilt TensorRT engine, set <code>metadata_path</code> to the verified FP32 export's <code>model.onnx.metadata.json</code>; the public input/output types are preserved by conversion.</p>
+<p dir="auto">
         Copy the selected package's
         <code class="notranslate">evaluation.yaml</code> into the external
         artifact root and<br />
