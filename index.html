@@ -92,9 +92,22 @@
           * Equal contribution &nbsp; † Project lead &nbsp; ✉ Corresponding
           authors
         </p>
-        <p class="correspondence" aria-label="Corresponding authors' email addresses">
-          <span>Wei Sui: <a href="mailto:wei.sui@d-robotics.cc">wei.sui@d-robotics.cc</a></span>
-          <span>Cong Yang: <a href="mailto:cong.yang@suda.edu.cn">cong.yang@suda.edu.cn</a></span>
+        <p
+          class="correspondence"
+          aria-label="Corresponding authors' email addresses"
+        >
+          <span
+            >Wei Sui:
+            <a href="mailto:wei.sui@d-robotics.cc"
+              >wei.sui@d-robotics.cc</a
+            ></span
+          >
+          <span
+            >Cong Yang:
+            <a href="mailto:cong.yang@suda.edu.cn"
+              >cong.yang@suda.edu.cn</a
+            ></span
+          >
         </p>
         <div class="resource-links">
           <a
@@ -427,7 +440,7 @@
               50 demonstrations and 100 evaluation episodes per task.
             </p>
           </article>
-          <article class="result-card">
+          <article class="result-card latency-card">
             <div class="card-heading">
               <span class="small-icon"
                 ><svg
@@ -447,19 +460,68 @@
                   /></svg
               ></span>
               <div>
-                <h3>GPU inference latency</h3>
-                <p>RTX 4090 · batch 1</p>
+                <h3>Inference latency</h3>
+                <p id="latency-platform">RDK S600 · INT16 · batch 1</p>
               </div>
+            </div>
+            <div
+              class="latency-tabs"
+              role="tablist"
+              aria-label="Latency platform and precision"
+            >
+              <button
+                type="button"
+                role="tab"
+                id="latency-tab-s600"
+                data-latency="s600"
+                aria-selected="true"
+                aria-controls="gpu-bars"
+                aria-label="RDK S600, INT16"
+              >
+                S600 <span>INT16</span>
+              </button>
+              <button
+                type="button"
+                role="tab"
+                id="latency-tab-gpu-fp16"
+                data-latency="gpu-fp16"
+                aria-selected="false"
+                aria-controls="gpu-bars"
+                aria-label="RTX 4090, FP16"
+                tabindex="-1"
+              >
+                4090 <span>FP16</span>
+              </button>
+              <button
+                type="button"
+                role="tab"
+                id="latency-tab-gpu-fp32"
+                data-latency="gpu-fp32"
+                aria-selected="false"
+                aria-controls="gpu-bars"
+                aria-label="RTX 4090, FP32"
+                tabindex="-1"
+              >
+                4090 <span>FP32</span>
+              </button>
             </div>
             <div
               class="latency-bars"
               id="gpu-bars"
-              aria-label="FP32 and FP16 inference latency"
+              role="tabpanel"
+              aria-labelledby="latency-tab-s600"
+              aria-describedby="latency-source-note latency-view-note"
             ></div>
-            <div class="edge-estimates">
-              <p class="edge-estimates-label">INT16 compiler estimates</p>
-              <div class="edge-speed-grid" id="edge-speed-grid"></div>
-            </div>
+            <p
+              class="latency-source-note"
+              id="latency-source-note"
+              aria-live="polite"
+            >
+              Paper Table VII. RTPolicy: compiler estimate. Lower is better.
+            </p>
+            <p class="latency-view-note" id="latency-view-note">
+              Native views: DP / VO-DP 1; RTPolicy / π0.5 3.
+            </p>
           </article>
         </div>
         <section
@@ -469,8 +531,13 @@
         >
           <div>
             <h3 id="quantization-evidence-title">INT16 quantization</h3>
-            <p>S100 and S600 compiler reports</p>
+            <p>RTPolicy · compiler estimates</p>
           </div>
+          <div
+            class="edge-speed-grid quantization-speeds"
+            id="edge-speed-grid"
+            aria-label="RTPolicy INT16 compiler estimates for S600 and S100"
+          ></div>
           <div class="report-download-actions">
             <a
               class="file-download"

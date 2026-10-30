@@ -8,9 +8,43 @@ window.RTPOLICY_CONTENT = {
     { name: "ACT", value: 29.7 },
     { name: "Diffusion Policy", value: 28.0 },
   ],
-  gpu_latency: [
-    { name: "FP32", value: 23.8 },
-    { name: "FP16", value: 10.92, ours: true },
+  latency_comparison: [
+    {
+      id: "s600",
+      platform: "RDK S600",
+      precision: "INT16",
+      note: "Paper Table VII. RTPolicy: compiler estimate. Lower is better.",
+      rows: [
+        { name: "DP", value: 19.76 },
+        { name: "RTPolicy", value: 30.35, ours: true },
+        { name: "VO-DP", value: 181.47 },
+        { name: "π0.5", value: 331.6 },
+      ],
+    },
+    {
+      id: "gpu-fp16",
+      platform: "RTX 4090",
+      precision: "FP16",
+      note: "Paper Table VII. TensorRT FP16. Lower is better.",
+      rows: [
+        { name: "DP", value: 8.72 },
+        { name: "RTPolicy", value: 10.92, ours: true },
+        { name: "VO-DP", value: 25.31 },
+        { name: "π0.5", value: 58.84 },
+      ],
+    },
+    {
+      id: "gpu-fp32",
+      platform: "RTX 4090",
+      precision: "FP32",
+      note: "Paper Table VII. TensorRT FP32. Lower is better.",
+      rows: [
+        { name: "DP", value: 23.15 },
+        { name: "RTPolicy", value: 23.8, ours: true },
+        { name: "VO-DP", value: 88.16 },
+        { name: "π0.5", value: 109.33 },
+      ],
+    },
   ],
   edge_estimates: [
     {

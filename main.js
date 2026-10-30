@@ -26,25 +26,64 @@
     );
     document.querySelector("#simulation-bars").append(row);
   }
-  const maxLatency = Math.max(...data.gpu_latency.map((x) => x.value));
-  for (const result of data.gpu_latency) {
+  const latencyRows = new Map();
+  for (const result of data.latency_comparison[0].rows) {
     const row = el(
       "div",
       undefined,
       `latency-row${result.ours ? " highlight" : ""}`,
     );
-    row.append(el("span", result.name));
+    row.append(el("span", result.name, "latency-name"));
     const track = el("div", undefined, "benchmark-track");
     track.setAttribute("aria-hidden", "true");
     const fill = el("span", undefined, "benchmark-fill");
-    fill.style.width = `${(result.value / maxLatency) * 100}%`;
     track.append(fill);
-    row.append(
-      track,
-      el("span", `${result.value.toFixed(2)} ms`, "latency-value"),
-    );
+    const value = el("span", undefined, "latency-value");
+    row.append(track, value);
     document.querySelector("#gpu-bars").append(row);
+    latencyRows.set(result.name, { fill, value });
   }
+  const latencyButtons = [...document.querySelectorAll("[data-latency]")];
+  function selectLatency(id) {
+    const mode = data.latency_comparison.find((item) => item.id === id);
+    if (!mode) return;
+    for (const button of latencyButtons) {
+      const selected = button.dataset.latency === id;
+      button.setAttribute("aria-selected", String(selected));
+      button.tabIndex = selected ? 0 : -1;
+    }
+    const maxLatency = Math.max(...mode.rows.map((item) => item.value));
+    for (const result of mode.rows) {
+      const row = latencyRows.get(result.name);
+      row.fill.style.width = `${(result.value / maxLatency) * 100}%`;
+      row.value.textContent = `${result.value.toFixed(2)} ms`;
+    }
+    document.querySelector("#latency-platform").textContent =
+      `${mode.platform} · ${mode.precision} · batch 1`;
+    document.querySelector("#latency-source-note").textContent = mode.note;
+    document
+      .querySelector("#gpu-bars")
+      .setAttribute("aria-labelledby", `latency-tab-${id}`);
+  }
+  latencyButtons.forEach((button, index) => {
+    button.addEventListener("click", () =>
+      selectLatency(button.dataset.latency),
+    );
+    button.addEventListener("keydown", (event) => {
+      let next;
+      if (event.key === "ArrowRight")
+        next = (index + 1) % latencyButtons.length;
+      else if (event.key === "ArrowLeft")
+        next = (index + latencyButtons.length - 1) % latencyButtons.length;
+      else if (event.key === "Home") next = 0;
+      else if (event.key === "End") next = latencyButtons.length - 1;
+      else return;
+      event.preventDefault();
+      latencyButtons[next].focus();
+      selectLatency(latencyButtons[next].dataset.latency);
+    });
+  });
+  selectLatency("s600");
   for (const result of data.edge_estimates) {
     const card = el("div", undefined, "edge-speed");
     const frequency = el("strong", result.hz.toFixed(1) + " ");

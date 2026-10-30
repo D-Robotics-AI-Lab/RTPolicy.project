@@ -514,18 +514,62 @@ sup {
   background: linear-gradient(90deg, #1a557e, #0795a2);
 }
 .latency-bars {
-  margin-top: 12px;
+  margin-top: 0;
+}
+.latency-card .card-heading {
+  margin-bottom: 16px;
+}
+.latency-tabs {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 4px;
+  padding: 4px;
+  margin-bottom: 18px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--soft);
+}
+.latency-tabs button {
+  display: grid;
+  gap: 2px;
+  padding: 7px 8px;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 16px;
+  font-weight: 650;
+  line-height: 1.25;
+  cursor: pointer;
+  transition:
+    background 0.18s,
+    color 0.18s,
+    box-shadow 0.18s;
+}
+.latency-tabs button span {
+  font-size: 13px;
+  font-weight: 500;
+}
+.latency-tabs button[aria-selected="true"] {
+  color: var(--blue);
+  background: #fff;
+  border-color: #c9dce5;
+  box-shadow: 0 2px 7px #173b530a;
+}
+.latency-tabs button:hover {
+  color: var(--blue);
 }
 .latency-row {
   display: grid;
-  grid-template-columns: 48px 1fr 85px;
+  grid-template-columns: 86px minmax(0, 1fr) 86px;
   align-items: center;
   gap: 12px;
-  margin-bottom: 16px;
+  margin-bottom: 14px;
   font-size: 16px;
 }
 .latency-row .benchmark-fill {
   background: #b5cbd6;
+  transition: width 0.44s cubic-bezier(0.22, 1, 0.36, 1);
 }
 .latency-row.highlight .benchmark-fill {
   background: linear-gradient(90deg, #1a557e, #0795a2);
@@ -533,6 +577,27 @@ sup {
 .latency-value {
   font: 15px/1.5 var(--mono);
   text-align: right;
+  white-space: nowrap;
+}
+.latency-name {
+  color: var(--muted);
+}
+.latency-row.highlight .latency-name,
+.latency-row.highlight .latency-value {
+  color: var(--blue);
+  font-weight: 700;
+}
+.latency-source-note,
+.latency-view-note {
+  color: var(--muted);
+  font-size: 15px;
+  line-height: 1.6;
+}
+.latency-source-note {
+  margin-top: 18px;
+}
+.latency-view-note {
+  margin-top: 6px;
 }
 .chart-note {
   font-size: 16px;
@@ -540,21 +605,15 @@ sup {
   line-height: 1.7;
   margin-top: 24px;
 }
-.edge-estimates {
-  margin-top: 24px;
-  padding-top: 18px;
-  border-top: 1px solid var(--line);
-}
-.edge-estimates-label {
-  color: var(--muted);
-  font-size: 16px;
-  font-weight: 600;
-  margin-bottom: 12px;
-}
 .edge-speed-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 12px;
+}
+.quantization-speeds {
+  flex: 1 1 280px;
+  min-width: 240px;
+  max-width: 360px;
 }
 .edge-speed {
   display: grid;
@@ -1022,6 +1081,12 @@ body.dialog-open {
     flex-direction: column;
     gap: 18px;
   }
+  .quantization-speeds {
+    flex-basis: auto;
+    min-width: 0;
+    max-width: none;
+    width: 100%;
+  }
   .code-panel pre {
     min-height: 0;
   }
@@ -1175,8 +1240,8 @@ body.dialog-open {
     font-size: 14px;
   }
   .latency-row {
-    grid-template-columns: 42px 1fr 78px;
-    gap: 9px;
+    grid-template-columns: 72px minmax(0, 1fr) 82px;
+    gap: 8px;
     font-size: 15px;
   }
   .latency-value {
@@ -1379,9 +1444,6 @@ body.dialog-open {
   .token-arrow {
     width: 30px;
     height: 22px;
-  }
-  .edge-estimates-label {
-    font-size: 15px;
   }
   .edge-speed {
     padding: 12px;
@@ -1693,6 +1755,10 @@ body.dialog-open {
   }
 }
 @media (prefers-reduced-motion: reduce) {
+  .latency-row .benchmark-fill,
+  .latency-tabs button {
+    transition: none;
+  }
   .hero::before {
     animation: none;
   }
