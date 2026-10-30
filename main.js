@@ -60,7 +60,6 @@
     }
     document.querySelector("#latency-platform").textContent =
       `${mode.platform} · ${mode.precision} · batch 1`;
-    document.querySelector("#latency-source-note").textContent = mode.note;
     document
       .querySelector("#gpu-bars")
       .setAttribute("aria-labelledby", `latency-tab-${id}`);
