@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>AI setup &amp; export · RTPolicy</title>
+    <title>AI setup &amp; validation · RTPolicy</title>
     <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml" />
     <link rel="stylesheet" href="../styles.css" />
   </head>
@@ -16,112 +16,368 @@
         >
       </div>
     </header>
-    <main class="guide-content"><h1 id="ai-setup-and-checkpoint-export">AI Setup and Checkpoint Export</h1>
-<p>Give a coding agent this guide, the <strong>repository URL or checkout</strong>, a <strong>checkpoint<br>
-directory</strong>, and a writable <strong>external artifact root</strong> (EFS where available).<br>
-The root requirements file installs PyTorch, RTPolicy, RoboTwin2, and ONNX.<br>
-TensorRT is an optional extra for the same CUDA 12 environment; install and run it<br>
-when requested. Task evaluation remains an explicit step.</p>
-<h2 id="copy-to-your-agent">Copy to your agent</h2>
-<pre lang="text" class="notranslate"><code class="notranslate">Follow https://d-robotics-ai-lab.github.io/RTPolicy.project/guides/AI_SETUP.md for https://github.com/D-Robotics-AI-Lab/RTPolicy, using LOCAL_REPO_PATH=/path/to/RTPolicy, CHECKPOINT_DIRECTORY=/path/to/checkpoint, and ARTIFACT_ROOT=/path/to/external/artifacts.
-Create a fresh compatible environment under ARTIFACT_ROOT, install the root requirements.txt, route caches and generated files there, and preserve shared environments and the original checkpoint.
-Inspect the checkpoint to derive actual cameras, state/action shapes, history, horizon, active NFE, and preprocessing; preserve those settings and check the native RoboTwin2 image convention.
-Verify rtpolicy imports and export static FP32 ONNX with --verify, explicitly distinguishing synthetic export checks from representative-input validation.
-If I request TensorRT, install the tensorrt extra, build and run mixed-FP16 inference on NVIDIA, and compare it with the FP32 reference. Prepare cuRobo and simulator assets only if I request task evaluation, keeping RoboTwin2 code unchanged.
-Validate each requested stage once; repeat an evaluation only if I request it or a new failure requires a targeted check.
-Return reproducible commands, resolved versions/configuration, I/O, numerical errors and tolerances, artifact paths, and exact missing-resource blockers, keeping generated results outside Git.
+    <main class="guide-content">
+      <h1 dir="auto" id="ai-setup-and-model-validation">
+        AI Setup and Model Validation
+      </h1>
+      <p dir="auto">
+        Give a coding agent this guide and a writable
+        <strong>external artifact root</strong> (EFS where<br />
+        available). It can clone the repository, install the environment,
+        download the<br />
+        released models from <strong>Google Drive</strong>, and validate an ONNX
+        export automatically.<br />
+        The default case is <strong>lift_pot, NFE4, seed0</strong>. A local
+        checkpoint is optional.
+      </p>
+      <h2 dir="auto" id="copy-to-your-agent">Copy to your agent</h2>
+      <pre
+        lang="text"
+        class="notranslate"
+      ><code class="notranslate">Follow https://d-robotics-ai-lab.github.io/RTPolicy.project/guides/AI_SETUP.md for https://github.com/D-Robotics-AI-Lab/RTPolicy, using ARTIFACT_ROOT=/path/to/external/artifacts. Use an existing checkout if available; otherwise clone the repository.
+Create an isolated compatible environment, install the root requirements.txt, and route downloads, checkpoints, caches and outputs outside Git.
+Automatically download the released lift_pot PyTorch model from the Google Drive links in the guide, verify its pinned SHA256 and safely extract it. Reuse verified cached files. A local checkpoint directory is optional.
+Inspect the checkpoint and export static FP32 ONNX with verification, using the released lift_pot protocol NFE4 and seed0 through configuration overrides; preserve checkpoint weights and stored config.json. If I provide another checkpoint or protocol, use those settings instead.
+Validate the exported policy once and report action/action_pred errors against the same FP32 reference and identical inputs/noise. Label synthetic inputs explicitly.
+If I request published ONNX or TensorRT validation, download and verify the matching package too. Check the TensorRT build environment before using its engine; rebuild from FP32 ONNX when the host requires it.
+Run RoboTwin2 task evaluation only when I request it, through the external launcher with the simulator code unchanged. Validate each requested stage once.
+Return reproducible commands, source/download identities and checksums, resolved versions/settings, real artifact paths and validation results. Report concrete blockers without substituting different models or claiming unrun tests.
 </code></pre>
-<h2 id="1-inspect-the-checkpoint">1. Inspect the checkpoint</h2>
-<p>Read <code class="notranslate">config.json</code> and the safetensors header before loading large weights.<br>
-The current loader requires <code class="notranslate">config.json</code> and <code class="notranslate">model.safetensors</code>; identify missing<br>
-files or an incompatible weight layout explicitly. Use the installed <code class="notranslate">rtpolicy</code><br>
-classes and <code class="notranslate">rtpolicy.common.checkpoint.load_checkpoint_config</code>, which normalizes<br>
-supported historical class and backbone metadata in memory. Inference and export<br>
-also normalize known historical tensor names and require complete weight coverage.</p>
-<p>Record <code class="notranslate">obs_encoder.rgb_key</code>, <code class="notranslate">shape_meta</code>, <code class="notranslate">action_key</code>/<code class="notranslate">supervision_key</code>,<br>
-<code class="notranslate">n_obs_steps</code>, <code class="notranslate">n_image_obs_steps</code>, <code class="notranslate">horizon</code>, <code class="notranslate">n_action_steps</code>, and<br>
-<code class="notranslate">noise_scheduler.num_inference_timesteps</code> (the active NFE). Resolve the referenced<br>
-backbone configuration/processor assets and check policy/normalizer weight coverage.<br>
-Derive shapes from this checkpoint rather than a previous experiment.</p>
-<p>Default RoboTwin2 D435 source images are <strong>240 × 320 (H × W)</strong>. Preserve the<br>
-checkpoint's preprocessing, including internal alignment; changing raw image size<br>
-or NFE requires an explicit experiment request. Keep the source checkpoint unchanged.<br>
-If the user supplies a benchmark NFE, apply it through the export configuration<br>
-and the evaluation override, without editing the checkpoint's <code class="notranslate">config.json</code>.</p>
-<h2 id="2-prepare-an-isolated-environment">2. Prepare an isolated environment</h2>
-<p>Read the root <code class="notranslate">requirements.txt</code> and<br>
-<code class="notranslate">pyproject.toml</code> for the unified stack and optional dependencies.<br>
-Inspect the host and select a<br>
-compatible interpreter and matched PyTorch/torchvision build before installing<br>
-repository dependencies. Use a fresh venv or conda prefix under the artifact root.<br>
-Route package/model caches and temporary files there too (<code class="notranslate">PIP_CACHE_DIR</code>, <code class="notranslate">HF_HOME</code>,<br>
-<code class="notranslate">TORCH_HOME</code>, <code class="notranslate">XDG_CACHE_HOME</code>, <code class="notranslate">TMPDIR</code>; <code class="notranslate">CUDA_CACHE_PATH</code> for NVIDIA).<br>
-Resolve symlinks to confirm the actual storage location.</p>
-<p>Run from the repository root in the new environment:</p>
-<div class="highlight highlight-source-shell"><pre class="notranslate">python -m pip install -r requirements.txt
+      <h2 dir="auto" id="1-prepare-an-isolated-environment">
+        1. Prepare an isolated environment
+      </h2>
+      <p dir="auto">
+        Inspect the host and choose a compatible interpreter and matched
+        PyTorch/torchvision<br />
+        build. Create a fresh environment under
+        <code class="notranslate">ARTIFACT_ROOT</code>; preserve shared
+        environments.<br />
+        Read the root
+        <a
+          href="https://github.com/D-Robotics-AI-Lab/RTPolicy/blob/main/requirements.txt"
+          >requirements.txt</a
+        >
+        and
+        <a
+          href="https://github.com/D-Robotics-AI-Lab/RTPolicy/blob/main/pyproject.toml"
+          >pyproject.toml</a
+        >.
+      </p>
+      <div class="highlight highlight-source-shell" dir="auto">
+        <pre class="notranslate">python -m pip install -r requirements.txt
 python -m pip check
-python -c <span class="pl-s"><span class="pl-pds">"</span>import rtpolicy, rtpolicy.models; print(rtpolicy.__file__)<span class="pl-pds">"</span></span>
-python -m rtpolicy.trainer.onnx --help</pre></div>
-<p>Record the ONNX execution provider actually used. Fix dependency or import<br>
-failures in the isolated environment. cuRobo compilation and simulator assets<br>
-belong to an explicitly requested task-evaluation step.</p>
-<h2 id="3-export-and-verify-fp32">3. Export and verify FP32</h2>
-<p>Run from the repository root in the new environment. Use the same<br>
-RoboTwin2 export YAML (<code class="notranslate">configs/rtpolicy_onnx/rtpolicy_onnx_robotwin2.yaml</code>) as the<br>
-README: set <code class="notranslate">checkpoint_dir</code>, a fresh external <code class="notranslate">output_dir</code>, and the selected<br>
-<code class="notranslate">device</code>. Keep <code class="notranslate">num_inference_timesteps: null</code> unless the user supplied a benchmark<br>
-override. Static FP32 export, image preprocessing, verification, and external<br>
-calibration outputs are configured in that YAML.</p>
-<div class="highlight highlight-source-shell"><pre class="notranslate">python main.py --config-path=configs/rtpolicy_onnx \
-  --config-name=rtpolicy_onnx_robotwin2</pre></div>
-<p>The configured output directory keeps samples and metrics outside the checkpoint.<br>
-Keep the <code class="notranslate">.onnx</code>, its external weight file, and<br>
-<code class="notranslate">.onnx.metadata.json</code> together; verify their actual I/O against the checkpoint.<br>
-Read the per-sample <code class="notranslate">verification_metrics.json</code>, require finite outputs, and report<br>
-both <code class="notranslate">action</code> and <code class="notranslate">action_pred</code> errors and tolerances.</p>
-<p>Without a calibration dataset, the exporter uses synthetic inputs. Label that result <strong>synthetic<br>
-export verification</strong>. Replay representative user-provided observations for a<br>
-real-input numerical check, using the recorded I/O and the same noise trajectory.<br>
-If those observations are absent, report that check as pending; numerical export<br>
-verification alone does not establish robot task success. Missing weights or<br>
-required backbone assets block export until resolved.</p>
-<p>For requested closed-loop validation, use the external<br>
-evaluation configuration (<code class="notranslate">configs/rtpolicy_eval/robotwin2.yaml</code>) and<br>
-launcher (<code class="notranslate">scripts/eval/run_robotwin2.py</code>). Keep the simulator's environment,<br>
-task, and evaluation code unchanged. The launcher calls its original evaluator<br>
-from an external working directory; backend adaptation stays in <code class="notranslate">rtpolicy</code>.<br>
-Record task settings, seed, NFE, JPEG setting, precision, original result logs,<br>
-and actual accepted seeds. Report each backend's measured success count without<br>
-altering the evaluator's preflight or case selection to force agreement.</p>
-<h2 id="4-nvidia-tensorrt-inference">4. NVIDIA TensorRT inference</h2>
-<p>For a requested TensorRT target, append its dependencies to the existing<br>
-environment and use an idle NVIDIA GPU. Starting from the verified static FP32<br>
-export:</p>
-<div class="highlight highlight-source-shell"><pre class="notranslate">python -m pip install -e <span class="pl-s"><span class="pl-pds">'</span>.[tensorrt]<span class="pl-pds">'</span></span>
-
-python scripts/fp16_convert.py \
-  /path/to/external/artifacts/model.onnx /path/to/external/artifacts/model-fp16.onnx
-python scripts/build_bench_x86.py build \
-  /path/to/external/artifacts/model-fp16.onnx /path/to/external/artifacts/model-fp16.engine \
-  strongly_typed
-
+python -c <span class="pl-s"><span class="pl-pds">"</span>import rtpolicy, rtpolicy.models; print(rtpolicy.__file__)<span class="pl-pds">"</span></span></pre>
+      </div>
+      <p dir="auto">
+        Create external <code class="notranslate">downloads</code>,
+        <code class="notranslate">checkpoints</code>,
+        <code class="notranslate">exports</code>, and
+        <code class="notranslate">evaluations</code> directories.<br />
+        Route package/model and temporary caches there (<code
+          class="notranslate"
+          >PIP_CACHE_DIR</code
+        >, <code class="notranslate">HF_HOME</code>,<br />
+        <code class="notranslate">TORCH_HOME</code>,
+        <code class="notranslate">XDG_CACHE_HOME</code>,
+        <code class="notranslate">TMPDIR</code>, and
+        <code class="notranslate">CUDA_CACHE_PATH</code> for NVIDIA).<br />
+        Resolve symlinks to confirm where files will be written.
+      </p>
+      <h2 dir="auto" id="2-download-from-google-drive">
+        2. Download from Google Drive
+      </h2>
+      <p dir="auto">
+        <a
+          href="https://drive.google.com/drive/folders/1UxLqe8mIYPSrPwuCchVBL2StSbZ67_0x"
+          rel="nofollow"
+          >Released checkpoint folder</a
+        >.<br />
+        These public downloads use <code class="notranslate">gdown</code>,
+        included in the root requirements. Google Drive<br />
+        account authorization is not needed for downloading the published files.
+      </p>
+      <div class="guide-table">
+        <table role="table">
+          <thead>
+            <tr>
+              <th>Model</th>
+              <th>Purpose</th>
+              <th>Google Drive</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>lift_pot · PyTorch</strong></td>
+              <td><strong>Default: export and numerical validation</strong></td>
+              <td>
+                <a
+                  href="https://drive.google.com/file/d/1382Y1VLgH7LEyJH49ZuVK5N0vsZo3XP5/view"
+                  rel="nofollow"
+                  >Download</a
+                >
+              </td>
+            </tr>
+            <tr>
+              <td>lift_pot · ONNX FP32</td>
+              <td>Validate the published NFE4 export</td>
+              <td>
+                <a
+                  href="https://drive.google.com/file/d/1RbjJ23fG8AjcpAz9O2Qlz75UXzMvb1NT/view"
+                  rel="nofollow"
+                  >Download</a
+                >
+              </td>
+            </tr>
+            <tr>
+              <td>lift_pot · TensorRT mixed FP16</td>
+              <td>Validate a compatible prebuilt NFE4 engine</td>
+              <td>
+                <a
+                  href="https://drive.google.com/file/d/1wjgUX8ptoTxo3MZX3gk3ke532PKDmYdK/view"
+                  rel="nofollow"
+                  >Download</a
+                >
+              </td>
+            </tr>
+            <tr>
+              <td>RoboTwin2 pretraining · PyTorch</td>
+              <td>Initialize fine-tuning</td>
+              <td>
+                <a
+                  href="https://drive.google.com/file/d/1mUBhBGJkg7Pc1zkn1EEEqU6XcfmXxMQp/view"
+                  rel="nofollow"
+                  >Download</a
+                >
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p dir="auto">
+        Download only the packages needed for the requested route. For the
+        default case,<br />
+        create the external download directory and run:
+      </p>
+      <div class="highlight highlight-source-shell" dir="auto">
+        <pre class="notranslate">python -m gdown --fuzzy \
+  <span class="pl-s"><span class="pl-pds">"</span>https://drive.google.com/file/d/1382Y1VLgH7LEyJH49ZuVK5N0vsZo3XP5/view<span class="pl-pds">"</span></span> \
+  --no-cookies --continue \
+  --output /path/to/external/artifacts/downloads/rtpolicy_lift_pot_pytorch_ft30k.zip</pre>
+      </div>
+      <p dir="auto">
+        Verify the archive SHA256 before extraction, using the pinned values
+        below or the<br />
+        published
+        <a
+          href="https://drive.google.com/file/d/1_Kynsf4PFK1qMwteFxDhUkGX7tzfeo2M/view"
+          rel="nofollow"
+          >SHA256SUMS</a
+        >.<br />
+        Reuse matching cached downloads. Extract into the external
+        <code class="notranslate">checkpoints</code> directory;<br />
+        reject absolute paths, parent traversal and symbolic links in archive
+        entries.<br />
+        Preserve existing unrelated files. If an extracted model already exists,
+        verify<br />
+        its files against the archive's
+        <code class="notranslate">manifest.json</code> before reusing it.
+      </p>
+      <details>
+        <summary>Release SHA256 checksums</summary>
+        <pre
+          lang="text"
+          class="notranslate"
+        ><code class="notranslate">770d9f664b0804655c778b72baac9e04880b94d1a8298084464ad13ed13c9037  rtpolicy_robotwin2_pretrain_cnnb_3v_300k.zip
+0948278d257585e1510d6b25822fb65359a2638c86ecc490a928a8816b31d046  rtpolicy_lift_pot_pytorch_ft30k.zip
+afd393d93e3c1152cdc8209701b2d0eaaed8a578286e85ca7a480b7218c14b26  rtpolicy_lift_pot_onnx_fp32_nfe4.zip
+96507bbd2492a747c9263216ddbbd531f1aed0908c8d3b6b14473993ae7af1da  rtpolicy_lift_pot_tensorrt_fp16_nfe4_l4_trt11.1.zip
+</code></pre>
+      </details>
+      <h3 dir="auto" id="inspect-the-checkpoint">Inspect the checkpoint</h3>
+      <p dir="auto">
+        The default ZIP extracts to
+        <code class="notranslate">rtpolicy_lift_pot_pytorch_ft30k/</code>,
+        containing<br />
+        <code class="notranslate">config.json</code>,
+        <code class="notranslate">model.safetensors</code>,
+        <code class="notranslate">evaluation.yaml</code>, and usage notes. It
+        includes<br />
+        the visual-backbone weights and configuration. Load through the
+        installed<br />
+        <code class="notranslate">rtpolicy</code> classes and require complete
+        policy/normalizer weight coverage.
+      </p>
+      <p dir="auto">
+        Read the config and safetensors header before loading large tensors.
+        Derive camera<br />
+        keys, shapes, history, horizon, action chunk, preprocessing and sampling
+        settings<br />
+        from this model. RoboTwin2 source images are
+        <strong>240 × 320 (H × W)</strong>.<br />
+        The released PyTorch checkpoint stores NFE10; apply the
+        <strong>NFE4</strong> release protocol<br />
+        through export/evaluation overrides, keeping the stored checkpoint
+        unchanged.<br />
+        For a user-provided checkpoint, preserve its settings unless a protocol
+        override<br />
+        was explicitly supplied.
+      </p>
+      <h2 dir="auto" id="3-export-and-verify-fp32">
+        3. Export and verify FP32
+      </h2>
+      <p dir="auto">
+        Use the
+        <a
+          href="https://github.com/D-Robotics-AI-Lab/RTPolicy/blob/main/configs/rtpolicy_onnx/rtpolicy_onnx_robotwin2.yaml"
+          >RoboTwin2 export YAML</a
+        >.<br />
+        With the default downloaded checkpoint, run:
+      </p>
+      <div class="highlight highlight-source-shell" dir="auto">
+        <pre class="notranslate">
+python main.py --config-path=configs/rtpolicy_onnx \
+  --config-name=rtpolicy_onnx_robotwin2 \
+  checkpoint_dir=/path/to/external/artifacts/checkpoints/rtpolicy_lift_pot_pytorch_ft30k \
+  output_dir=/path/to/external/artifacts/exports/lift_pot_nfe4 \
+  num_inference_timesteps=4 seed=0</pre
+        >
+      </div>
+      <p dir="auto">
+        Select the export device according to the host. The YAML enables static
+        FP32<br />
+        export, image preprocessing, numerical verification and one saved
+        calibration<br />
+        sample. Require finite <code class="notranslate">action</code> and
+        <code class="notranslate">action_pred</code> outputs and check<br />
+        <code class="notranslate">verification_metrics.json</code> with the
+        configured <code class="notranslate">rtol/atol: 1e-4</code>.<br />
+        Keep the <code class="notranslate">.onnx</code>,
+        <code class="notranslate">.onnx.data</code>, and
+        <code class="notranslate">.onnx.metadata.json</code> together.
+      </p>
+      <p dir="auto">
+        The verification compares the same weights, observations and noise
+        trajectory<br />
+        against a reproducible FP32 mathematical reference. With no supplied
+        dataset,<br />
+        label the result <strong>synthetic export verification</strong>. When
+        representative inputs<br />
+        are available, replay those inputs and report their source separately.
+      </p>
+      <p dir="auto">
+        If asked to test the published ONNX package, download and verify that
+        ZIP too,<br />
+        then run its graph on the same saved input tensors using ONNX Runtime.
+        Record the<br />
+        provider actually used and compare both outputs with the same
+        reference.<br />
+        Use one numerical check; run latency benchmarking only when requested.
+      </p>
+      <h2 dir="auto" id="4-nvidia-tensorrt-inference">
+        4. NVIDIA TensorRT inference
+      </h2>
+      <p dir="auto">For a requested TensorRT target:</p>
+      <div class="highlight highlight-source-shell" dir="auto">
+        <pre
+          class="notranslate"
+        >python -m pip install -e <span class="pl-s"><span class="pl-pds">'</span>.[tensorrt]<span class="pl-pds">'</span></span></pre>
+      </div>
+      <p dir="auto">
+        The published engine was built on
+        <strong>NVIDIA L4 with TensorRT 11.1.0.106</strong>.<br />
+        Download its ZIP only when needed, verify its SHA256, and inspect<br />
+        <code class="notranslate">build_environment.json</code> before selecting
+        the prebuilt engine. Keep<br />
+        <code class="notranslate">model.engine.metadata.json</code> alongside
+        <code class="notranslate">model.engine</code>.
+      </p>
+      <p dir="auto">
+        On a compatible host, validate the engine on the same saved export
+        inputs:
+      </p>
+      <div class="highlight highlight-source-shell" dir="auto">
+        <pre class="notranslate">
 python scripts/infer_tensorrt.py \
-  --engine-path /path/to/external/artifacts/model-fp16.engine \
-  --inputs-dir /path/to/external/artifacts/onnx_calibration/sample_000/inputs \
-  --output-dir /path/to/external/artifacts/tensorrt_outputs</pre></div>
-<p>Execute the engine on the same saved inputs and compare it with the FP32 reference;<br>
-report finite checks, per-output errors, declared tolerances, and the input source.<br>
-Sensitive operators remain FP32. <strong>S100/S600 BPU INT16 uses a separate toolchain</strong><br>
-and needs its own target validation.</p>
-<p>For requested RoboTwin2 evaluation, select <code class="notranslate">backend: tensorrt</code> in the external<br>
-evaluation YAML, set <code class="notranslate">model_path</code> to the engine and <code class="notranslate">metadata_path</code> to the original<br>
-FP32 export sidecar, and call the unchanged evaluator through the launcher.</p>
-<h2 id="deliver-the-result">Deliver the result</h2>
-<p>Write a short report and machine-readable manifest under the artifact root:<br>
-source revision/checkpoint identity, environment creation and replay commands,<br>
-resolved package versions, sampling/preprocessing configuration, I/O names/shapes/<br>
-dtypes, verification input source and metrics, and any remaining blockers.<br>
-List generated files with real storage paths and cleanup conditions. Leave model<br>
-artifacts, environments, caches, samples, and reports outside repository commits.</p></main>
+  --engine-path /path/to/external/artifacts/checkpoints/rtpolicy_lift_pot_tensorrt_fp16_nfe4_l4_trt11.1/model.engine \
+  --inputs-dir /path/to/external/artifacts/exports/lift_pot_nfe4/onnx_calibration/sample_000/inputs \
+  --output-dir /path/to/external/artifacts/tensorrt_outputs</pre
+        >
+      </div>
+      <p dir="auto">
+        When the host requires a rebuilt engine, use the verified FP32 ONNX
+        export:
+      </p>
+      <div class="highlight highlight-source-shell" dir="auto">
+        <pre class="notranslate">
+python scripts/fp16_convert.py \
+  /path/to/external/artifacts/exports/lift_pot_nfe4/model.onnx \
+  /path/to/external/artifacts/exports/lift_pot_nfe4/model-fp16.onnx
+python scripts/build_bench_x86.py build \
+  /path/to/external/artifacts/exports/lift_pot_nfe4/model-fp16.onnx \
+  /path/to/external/artifacts/exports/lift_pot_nfe4/model-fp16.engine strongly_typed</pre
+        >
+      </div>
+      <p dir="auto">
+        Execute each selected engine once on the saved inputs. Compare finite
+        outputs with<br />
+        the FP32 reference, reporting errors and declared tolerances
+        (mixed-FP16<br />
+        <code class="notranslate">rtol/atol: 1e-2</code>). Preserve the input
+        shapes and NFE4 across all selected backends.
+      </p>
+      <h2 dir="auto" id="5-optional-robotwin2-task-evaluation">
+        5. Optional RoboTwin2 task evaluation
+      </h2>
+      <p dir="auto">
+        For a task-success measurement, add this to the agent prompt:
+      </p>
+      <pre
+        lang="text"
+        class="notranslate"
+      ><code class="notranslate">Also evaluate lift_pot once with the requested backend using the released evaluation.yaml, NFE4, seed0, and 100 episodes. Prepare the official simulator assets and dependencies on external storage; keep RoboTwin2 task/evaluator code and case selection unchanged. Preserve logs and actual accepted seeds.
+</code></pre>
+      <p dir="auto">
+        Copy the selected package's
+        <code class="notranslate">evaluation.yaml</code> into the external
+        artifact root and<br />
+        set its absolute <code class="notranslate">ckpt_setting</code> (PyTorch)
+        or <code class="notranslate">model_path</code> (ONNX/TensorRT). The<br />
+        included YAML already fixes the released task, NFE and seed. Prepare
+        cuRobo,<br />
+        SAPIEN/Vulkan and official assets when this evaluation is requested,
+        then use the<br />
+        <a
+          href="https://github.com/D-Robotics-AI-Lab/RTPolicy/blob/main/scripts/eval/run_robotwin2.py"
+          >external launcher</a
+        >:
+      </p>
+      <div class="highlight highlight-source-shell" dir="auto">
+        <pre class="notranslate">
+python scripts/eval/run_robotwin2.py \
+  --config /path/to/external/artifacts/evaluation.yaml \
+  --runtime-dir /path/to/external/artifacts/evaluations/lift_pot</pre
+        >
+      </div>
+      <p dir="auto">
+        Numerical export checks and robot task-success measurements are distinct
+        results.<br />
+        Run each requested backend evaluation once; repeat only for an explicit
+        request<br />
+        or a targeted check required by a new failure.
+      </p>
+      <h2 dir="auto" id="deliver-the-result">Deliver the result</h2>
+      <p dir="auto">
+        Report download URLs and verified hashes, repository revision, model
+        directory,<br />
+        resolved environment versions, sampling/preprocessing overrides,
+        commands,<br />
+        I/O names/shapes/dtypes, numerical errors and input sources. Include
+        task-success<br />
+        logs only for evaluations actually performed. Record real artifact/cache
+        paths<br />
+        and cleanup conditions; keep downloads, models, environments and outputs
+        outside Git.
+      </p>
+    </main>
   </body>
 </html>
